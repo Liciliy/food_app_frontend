@@ -1,0 +1,1703 @@
+openapi: 3.0.3
+info:
+  title: Food App API
+  version: 0.1.0
+  description: Django REST API for the Food App
+paths:
+  /api/auth/login/:
+    post:
+      operationId: auth_login_create
+      description: Login with email and password to get authentication token
+      summary: User login
+      tags:
+      - Authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Login'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Login'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Login'
+        required: true
+      security:
+      - TokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Login successful
+                example:
+                  token: your-auth-token-here
+                  user:
+                    id: 1
+                    email: user@example.com
+                    first_name: John
+                    last_name: Doe
+                    is_active: true
+                    date_joined: '2025-01-01T00:00:00Z'
+                    last_login: '2025-01-01T12:00:00Z'
+                  device_info:
+                    user_agent: Mozilla/5.0...
+                    client_ip: 127.0.0.1
+                    device_type: Desktop
+                  expiry: '2025-01-01T22:00:00Z'
+          description: ''
+        '400':
+          description: Invalid credentials or validation error
+  /api/auth/logout/:
+    post:
+      operationId: auth_logout_create
+      description: Logout from current device only, keeping other device sessions
+        active
+      summary: Logout from current device
+      tags:
+      - Authentication
+      security:
+      - TokenAuth: []
+      responses:
+        '200':
+          description: Successfully logged out
+        '401':
+          description: Authentication required
+  /api/auth/logout-all/:
+    post:
+      operationId: auth_logout_all_create
+      description: Logout from all devices, invalidating all user tokens
+      summary: Logout from all devices
+      tags:
+      - Authentication
+      security:
+      - TokenAuth: []
+      responses:
+        '200':
+          description: Successfully logged out from all devices
+        '401':
+          description: Authentication required
+  /api/auth/mfa/{method}/activate/:
+    post:
+      operationId: auth_mfa_activate_create_2
+      parameters:
+      - in: path
+        name: method
+        schema:
+          type: string
+        required: true
+      tags:
+      - auth
+      security:
+      - TokenAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/auth/mfa/{method}/activate/confirm/:
+    post:
+      operationId: auth_mfa_activate_confirm_create
+      parameters:
+      - in: path
+        name: method
+        schema:
+          type: string
+        required: true
+      tags:
+      - auth
+      security:
+      - TokenAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/auth/mfa/{method}/codes/regenerate/:
+    post:
+      operationId: auth_mfa_codes_regenerate_create
+      parameters:
+      - in: path
+        name: method
+        schema:
+          type: string
+        required: true
+      tags:
+      - auth
+      security:
+      - TokenAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/auth/mfa/{method}/deactivate/:
+    post:
+      operationId: auth_mfa_deactivate_create
+      parameters:
+      - in: path
+        name: method
+        schema:
+          type: string
+        required: true
+      tags:
+      - auth
+      security:
+      - TokenAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/auth/mfa/activate/:
+    post:
+      operationId: auth_mfa_activate_create
+      description: Activate a Multi-Factor Authentication method (email or app)
+      summary: Activate MFA method
+      tags:
+      - Multi-Factor Authentication
+      security:
+      - TokenAuth: []
+      responses:
+        '200':
+          description: MFA method activated successfully
+        '400':
+          description: Validation error
+        '401':
+          description: Authentication required
+  /api/auth/mfa/code/request/:
+    post:
+      operationId: auth_mfa_code_request_create
+      tags:
+      - auth
+      security:
+      - TokenAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/auth/mfa/mfa/change-primary-method/:
+    post:
+      operationId: auth_mfa_mfa_change_primary_method_create
+      tags:
+      - auth
+      security:
+      - TokenAuth: []
+      responses:
+        '200':
+          description: No response body
+  /api/auth/mfa/mfa/config/:
+    get:
+      operationId: auth_mfa_mfa_config_retrieve
+      tags:
+      - auth
+      security:
+      - TokenAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/auth/mfa/mfa/user-active-methods/:
+    get:
+      operationId: auth_mfa_mfa_user_active_methods_list
+      tags:
+      - auth
+      security:
+      - TokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserMFAMethod'
+          description: ''
+  /api/auth/password/change/:
+    post:
+      operationId: auth_password_change_create
+      description: |-
+        Calls Django Auth SetPasswordForm save method.
+
+        Accepts the following POST parameters: new_password1, new_password2
+        Returns the success/fail message.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordChange'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordChange'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordChange'
+        required: true
+      security:
+      - TokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestAuthDetail'
+          description: ''
+  /api/auth/password/reset/:
+    post:
+      operationId: auth_password_reset_create
+      description: |-
+        Calls Django Auth PasswordResetForm save method.
+
+        Accepts the following POST parameters: email
+        Returns the success/fail message.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordReset'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordReset'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordReset'
+        required: true
+      security:
+      - TokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestAuthDetail'
+          description: ''
+  /api/auth/password/reset/confirm/:
+    post:
+      operationId: auth_password_reset_confirm_create
+      description: |-
+        Password reset e-mail link is confirmed, therefore
+        this resets the user's password.
+
+        Accepts the following POST parameters: token, uid,
+            new_password1, new_password2
+        Returns the success/fail message.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirm'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirm'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasswordResetConfirm'
+        required: true
+      security:
+      - TokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestAuthDetail'
+          description: ''
+  /api/auth/profile/:
+    get:
+      operationId: auth_profile_retrieve
+      description: Get detailed information about the current authenticated user
+      summary: Get current user profile
+      tags:
+      - User Profile
+      security:
+      - TokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetails'
+          description: ''
+        '401':
+          description: Authentication required
+  /api/auth/profile/update/:
+    put:
+      operationId: auth_profile_update_update
+      description: Update current user profile information
+      summary: Update user profile
+      tags:
+      - User Profile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDetails'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserDetails'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserDetails'
+        required: true
+      security:
+      - TokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetails'
+          description: ''
+        '400':
+          description: Validation error
+        '401':
+          description: Authentication required
+    patch:
+      operationId: auth_profile_update_partial_update
+      description: Update current user profile information
+      summary: Update user profile
+      tags:
+      - User Profile
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserDetails'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserDetails'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserDetails'
+      security:
+      - TokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetails'
+          description: ''
+        '400':
+          description: Validation error
+        '401':
+          description: Authentication required
+  /api/auth/registration/:
+    post:
+      operationId: auth_registration_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Register'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Register'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Register'
+        required: true
+      security:
+      - TokenAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestAuthDetail'
+          description: ''
+  /api/auth/registration/resend-email/:
+    post:
+      operationId: auth_registration_resend_email_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResendEmailVerification'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ResendEmailVerification'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ResendEmailVerification'
+        required: true
+      security:
+      - TokenAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestAuthDetail'
+          description: ''
+  /api/auth/registration/verify-email/:
+    post:
+      operationId: auth_registration_verify_email_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyEmail'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/VerifyEmail'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VerifyEmail'
+        required: true
+      security:
+      - TokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RestAuthDetail'
+          description: ''
+  /api/auth/tokens/:
+    get:
+      operationId: auth_tokens_list
+      description: Get list of active authentication sessions/tokens for current user
+      summary: List active sessions
+      tags:
+      - Authentication
+      security:
+      - TokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DeviceToken'
+          description: ''
+        '401':
+          description: Authentication required
+  /api/auth/tokens/{id}/:
+    delete:
+      operationId: auth_tokens_destroy
+      description: Revoke a specific authentication token/session
+      summary: Revoke specific session
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+        required: true
+      tags:
+      - Authentication
+      security:
+      - TokenAuth: []
+      responses:
+        '204':
+          description: Token successfully revoked
+        '401':
+          description: Authentication required
+        '404':
+          description: Token not found
+  /api/auth/user/:
+    get:
+      operationId: auth_user_retrieve
+      description: |-
+        Reads and updates UserModel fields
+        Accepts GET, PUT, PATCH methods.
+
+        Default accepted fields: username, first_name, last_name
+        Default display fields: pk, username, email, first_name, last_name
+        Read-only fields: pk, email
+
+        Returns UserModel fields.
+      tags:
+      - auth
+      security:
+      - TokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetails'
+          description: ''
+    put:
+      operationId: auth_user_update
+      description: |-
+        Reads and updates UserModel fields
+        Accepts GET, PUT, PATCH methods.
+
+        Default accepted fields: username, first_name, last_name
+        Default display fields: pk, username, email, first_name, last_name
+        Read-only fields: pk, email
+
+        Returns UserModel fields.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserDetails'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserDetails'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserDetails'
+        required: true
+      security:
+      - TokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetails'
+          description: ''
+    patch:
+      operationId: auth_user_partial_update
+      description: |-
+        Reads and updates UserModel fields
+        Accepts GET, PUT, PATCH methods.
+
+        Default accepted fields: username, first_name, last_name
+        Default display fields: pk, username, email, first_name, last_name
+        Read-only fields: pk, email
+
+        Returns UserModel fields.
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserDetails'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserDetails'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserDetails'
+      security:
+      - TokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetails'
+          description: ''
+  /api/food/meals/:
+    get:
+      operationId: food_meals_list
+      description: List your meals created from analyzed voice inputs with optional
+        date filtering.
+      summary: List meals
+      parameters:
+      - in: query
+        name: date
+        schema:
+          type: string
+        description: Filter meals for specific date (YYYY-MM-DD)
+      - in: query
+        name: date_from
+        schema:
+          type: string
+        description: Filter meals from date (YYYY-MM-DD)
+      - in: query
+        name: date_to
+        schema:
+          type: string
+        description: Filter meals to date (YYYY-MM-DD)
+      - in: query
+        name: month
+        schema:
+          type: string
+        description: Filter meals for specific month (YYYY-MM)
+      - in: query
+        name: week
+        schema:
+          type: string
+        description: Filter meals for specific week (YYYY-WNN, e.g., 2025-W33)
+      tags:
+      - Food Logging
+      security:
+      - TokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Meal'
+          description: ''
+  /api/food/meals/{id}/:
+    get:
+      operationId: food_meals_retrieve
+      description: Get details for a specific meal.
+      summary: Retrieve meal
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this meal.
+        required: true
+      tags:
+      - Food Logging
+      security:
+      - TokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Meal'
+          description: ''
+  /api/food/meals/dashboard/:
+    get:
+      operationId: food_meals_dashboard_retrieve
+      description: Get quick overview statistics for today, this week, and this month
+      summary: Dashboard overview
+      tags:
+      - Food Statistics
+      security:
+      - TokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardResponse'
+          description: Dashboard statistics
+  /api/food/meals/stats/daily/:
+    get:
+      operationId: food_meals_stats_daily_retrieve
+      description: Get daily nutritional statistics for a specific date
+      summary: Daily statistics
+      parameters:
+      - in: query
+        name: date
+        schema:
+          type: string
+        description: Date for statistics (YYYY-MM-DD). Defaults to today.
+      tags:
+      - Food Statistics
+      security:
+      - TokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DailyStatsResponse'
+          description: Daily statistics
+  /api/food/meals/stats/monthly/:
+    get:
+      operationId: food_meals_stats_monthly_retrieve
+      description: Get monthly nutritional statistics
+      summary: Monthly statistics
+      parameters:
+      - in: query
+        name: month
+        schema:
+          type: string
+        description: Month for statistics (YYYY-MM). Defaults to current month.
+      tags:
+      - Food Statistics
+      security:
+      - TokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonthlyStatsResponse'
+          description: Monthly statistics
+  /api/food/meals/stats/weekly/:
+    get:
+      operationId: food_meals_stats_weekly_retrieve
+      description: Get weekly nutritional statistics
+      summary: Weekly statistics
+      parameters:
+      - in: query
+        name: week
+        schema:
+          type: string
+        description: Week for statistics (YYYY-WNN). Defaults to current week.
+      tags:
+      - Food Statistics
+      security:
+      - TokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WeeklyStatsResponse'
+          description: Weekly statistics
+  /api/food/voice-inputs/upload/:
+    post:
+      operationId: food_voice_inputs_upload_create
+      description: Upload an audio file to create a meal with AI-powered nutritional
+        analysis. The audio is transcribed using Whisper, analyzed by GPT-4o-mini,
+        and a Meal record is created with itemized food data.
+      summary: Upload a voice input for transcription and analysis
+      tags:
+      - Food Logging
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                audio:
+                  type: string
+                  format: binary
+                  description: Audio file (WAV, MP3, M4A, OGG, WebM, AAC). Also accepts
+                    "file" as field name.
+              required:
+              - audio
+      security:
+      - TokenAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VoiceUploadResponse'
+          description: Voice input processed and meal created
+        '400':
+          description: Bad request (no audio, unsupported format, or no speech detected)
+        '502':
+          description: Transcription or analysis failed
+  /api/hello/:
+    get:
+      operationId: hello_retrieve
+      description: Returns a simple hello world message
+      summary: Hello World Endpoint
+      tags:
+      - Test
+      security:
+      - TokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                description: Success
+                example:
+                  message: Hello world
+          description: ''
+  /api/schema/:
+    get:
+      operationId: schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - schema
+      security:
+      - TokenAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+components:
+  schemas:
+    DailyStatsResponse:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          description: Date of statistics
+        total_calories:
+          type: number
+          format: double
+          description: Total calories consumed
+        macros:
+          type: object
+          additionalProperties: {}
+          description: Total macros (protein, carbs, fat in grams)
+        meal_count:
+          type: integer
+          description: Number of meals
+        meal_breakdown:
+          type: object
+          additionalProperties: {}
+          description: Breakdown by meal type with count and calories
+        meals:
+          type: array
+          items:
+            $ref: '#/components/schemas/Meal'
+      required:
+      - date
+      - macros
+      - meal_breakdown
+      - meal_count
+      - meals
+      - total_calories
+    DashboardMonthStats:
+      type: object
+      properties:
+        month:
+          type: string
+          description: Current month in YYYY-MM format
+        calories:
+          type: number
+          format: double
+          description: Total calories for the month
+        meal_count:
+          type: integer
+          description: Number of meals this month
+      required:
+      - calories
+      - meal_count
+      - month
+    DashboardResponse:
+      type: object
+      properties:
+        today:
+          $ref: '#/components/schemas/DashboardTodayStats'
+        this_week:
+          $ref: '#/components/schemas/DashboardWeekStats'
+        this_month:
+          $ref: '#/components/schemas/DashboardMonthStats'
+      required:
+      - this_month
+      - this_week
+      - today
+    DashboardTodayStats:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+          description: Current date in ISO format
+        calories:
+          type: number
+          format: double
+          description: Total calories consumed today
+        meal_count:
+          type: integer
+          description: Number of meals logged today
+      required:
+      - calories
+      - date
+      - meal_count
+    DashboardWeekStats:
+      type: object
+      properties:
+        week_start:
+          type: string
+          format: date
+          description: Start of current week (Monday)
+        week_end:
+          type: string
+          format: date
+          description: End of current week (Sunday)
+        calories:
+          type: number
+          format: double
+          description: Total calories for the week
+        meal_count:
+          type: integer
+          description: Number of meals this week
+        average_daily_calories:
+          type: number
+          format: double
+          description: Average daily calories for the week
+      required:
+      - average_daily_calories
+      - calories
+      - meal_count
+      - week_end
+      - week_start
+    DeviceToken:
+      type: object
+      description: |-
+        Serializer for device token information.
+
+        Used to display information about active authentication tokens.
+      properties:
+        token_key:
+          type: string
+          readOnly: true
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+        expiry:
+          type: string
+          format: date-time
+          readOnly: true
+        device_name:
+          type: string
+          maxLength: 255
+        user_agent:
+          type: string
+          readOnly: true
+      required:
+      - created
+      - expiry
+      - token_key
+      - user_agent
+    FoodItem:
+      type: object
+      description: Serializer for FoodItem.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          description: Human-readable item name (e.g., Apple, Oatmeal).
+          maxLength: 256
+        name_in_english:
+          type: string
+          nullable: true
+          description: Item name in English for standardization.
+          maxLength: 256
+        brand:
+          type: string
+          nullable: true
+          description: Optional brand or restaurant.
+          maxLength: 128
+        quantity:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          nullable: true
+          description: Numeric quantity (e.g., 1.5).
+        unit:
+          type: string
+          nullable: true
+          description: Unit of measure (e.g., cup, g, piece).
+          maxLength: 64
+        unit_in_english:
+          type: string
+          nullable: true
+          description: Unit of measure in English for standardization.
+          maxLength: 64
+        calories_total:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          nullable: true
+          description: Estimated total calories for this item.
+        protein_grams:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          nullable: true
+          description: Protein in grams.
+        carbs_grams:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          nullable: true
+          description: Carbs in grams.
+        fat_grams:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          nullable: true
+          description: Fat in grams.
+        extra_details:
+          description: Additional parsed attributes (e.g., sugar, fiber).
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Creation timestamp.
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Last update timestamp.
+      required:
+      - created_at
+      - id
+      - name
+      - updated_at
+    LLMAnalysis:
+      type: object
+      description: Serializer for LLMAnalysis model.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          readOnly: true
+          description: Owner of this analysis result.
+        voice_input:
+          type: integer
+          description: The source voice input this analysis is based on.
+        model_name:
+          type: string
+          readOnly: true
+          description: LLM model identifier (e.g., gpt-4o-mini).
+        prompt:
+          type: string
+          readOnly: true
+          description: Prompt sent to the LLM.
+        response_json:
+          readOnly: true
+          description: Raw LLM structured output (JSON).
+        confidence_score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,1}(?:\.\d{0,3})?$
+          readOnly: true
+          nullable: true
+          description: Optional confidence in [0,1].
+        prompt_tokens:
+          type: integer
+          readOnly: true
+          nullable: true
+          description: Number of prompt tokens used.
+        completion_tokens:
+          type: integer
+          readOnly: true
+          nullable: true
+          description: Number of completion tokens used.
+        analysis_latency_ms:
+          type: integer
+          readOnly: true
+          nullable: true
+          description: Time the LLM analysis took in milliseconds.
+        estimated_cost_usd:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,4}(?:\.\d{0,4})?$
+          readOnly: true
+          nullable: true
+          description: Estimated USD cost for the LLM analysis call.
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
+          readOnly: true
+          description: |-
+            Status of the LLM analysis.
+
+            * `pending` - Pending
+            * `success` - Success
+            * `failed` - Failed
+        error_message:
+          type: string
+          readOnly: true
+          nullable: true
+          description: Error details if analysis failed.
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Creation timestamp.
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Last update timestamp.
+      required:
+      - analysis_latency_ms
+      - completion_tokens
+      - confidence_score
+      - created_at
+      - error_message
+      - estimated_cost_usd
+      - id
+      - model_name
+      - prompt
+      - prompt_tokens
+      - response_json
+      - status
+      - updated_at
+      - user
+      - voice_input
+    Login:
+      type: object
+      description: |-
+        Custom login serializer that uses email instead of username.
+
+        Extends dj-rest-auth's LoginSerializer to work with email authentication.
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+      required:
+      - email
+      - password
+    Meal:
+      type: object
+      description: Serializer for Meal with nested items (read-only by default).
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+          readOnly: true
+          description: Owner of this meal record.
+        voice_input:
+          type: integer
+          nullable: true
+          description: 'Optional: voice input that produced this meal.'
+        llm_analysis:
+          type: integer
+          readOnly: true
+          nullable: true
+          description: 'Optional: LLM analysis record used to create this meal.'
+        consumed_at:
+          type: string
+          format: date-time
+          description: When the food was consumed (as understood by the LLM).
+        meal_type:
+          allOf:
+          - $ref: '#/components/schemas/MealTypeEnum'
+          description: |-
+            Meal type classification.
+
+            * `unknown` - Unknown
+            * `breakfast` - Breakfast
+            * `lunch` - Lunch
+            * `dinner` - Dinner
+            * `snack` - Snack
+        description:
+          type: string
+          nullable: true
+          description: Description in user language.
+        description_en:
+          type: string
+          nullable: true
+          description: Description in English.
+        cuisine:
+          type: string
+          nullable: true
+          description: Cuisine in user language.
+          maxLength: 128
+        cuisine_en:
+          type: string
+          nullable: true
+          description: Cuisine in English.
+          maxLength: 128
+        portion_size:
+          type: string
+          nullable: true
+          description: Portion size in user language.
+          maxLength: 128
+        portion_size_en:
+          type: string
+          nullable: true
+          description: Portion size in English.
+          maxLength: 128
+        additional_info:
+          type: string
+          nullable: true
+          description: Additional info in user language.
+        additional_info_en:
+          type: string
+          nullable: true
+          description: Additional info in English.
+        total_calories:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,2})?$
+          readOnly: true
+          description: Total calories for this meal (sum of items).
+        macros:
+          readOnly: true
+          description: 'Aggregate macros, e.g., {"protein": g, "carbs": g, "fat":
+            g}.'
+        language:
+          type: string
+          readOnly: true
+          nullable: true
+          description: Detected language code of the input.
+        notes:
+          type: string
+          nullable: true
+          description: Free-form notes or the original parsed phrase.
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/FoodItem'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Creation timestamp.
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: Last update timestamp.
+      required:
+      - created_at
+      - id
+      - items
+      - language
+      - llm_analysis
+      - macros
+      - total_calories
+      - updated_at
+      - user
+    MealTypeEnum:
+      enum:
+      - unknown
+      - breakfast
+      - lunch
+      - dinner
+      - snack
+      type: string
+      description: |-
+        * `unknown` - Unknown
+        * `breakfast` - Breakfast
+        * `lunch` - Lunch
+        * `dinner` - Dinner
+        * `snack` - Snack
+    MonthlyStatsResponse:
+      type: object
+      properties:
+        month:
+          type: string
+          description: Month identifier (YYYY-MM)
+        year:
+          type: integer
+          description: Year number
+        month_number:
+          type: integer
+          description: Month number (1-12)
+        month_name:
+          type: string
+          description: Full month name
+        total_calories:
+          type: number
+          format: double
+          description: Total calories for the month
+        average_daily_calories:
+          type: number
+          format: double
+          description: Average daily calories
+        meal_count:
+          type: integer
+          description: Total meals in the month
+        days_in_month:
+          type: integer
+          description: Number of days in the month
+      required:
+      - average_daily_calories
+      - days_in_month
+      - meal_count
+      - month
+      - month_name
+      - month_number
+      - total_calories
+      - year
+    PasswordChange:
+      type: object
+      description: |-
+        Custom password change serializer with enhanced validation.
+
+        Extends dj-rest-auth's PasswordChangeSerializer with additional validation.
+      properties:
+        new_password1:
+          type: string
+          maxLength: 128
+        new_password2:
+          type: string
+          maxLength: 128
+      required:
+      - new_password1
+      - new_password2
+    PasswordReset:
+      type: object
+      description: |-
+        Custom password reset serializer for email-based reset.
+
+        Extends dj-rest-auth's PasswordResetSerializer to work with email.
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+      - email
+    PasswordResetConfirm:
+      type: object
+      description: Serializer for confirming a password reset attempt.
+      properties:
+        new_password1:
+          type: string
+          maxLength: 128
+        new_password2:
+          type: string
+          maxLength: 128
+        uid:
+          type: string
+        token:
+          type: string
+      required:
+      - new_password1
+      - new_password2
+      - token
+      - uid
+    PatchedUserDetails:
+      type: object
+      description: |-
+        Serializer for detailed user profile information.
+
+        Used for user profile endpoints and detailed user information.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          format: email
+          title: Email address
+          description: Required. Enter a valid email address.
+          maxLength: 254
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        is_active:
+          type: boolean
+          readOnly: true
+          title: Active
+          description: Designates whether this user should be treated as active. Unselect
+            this instead of deleting accounts.
+        date_joined:
+          type: string
+          format: date-time
+          readOnly: true
+        last_login:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+    Register:
+      type: object
+      description: |-
+        Custom registration serializer for email-based registration.
+
+        Extends dj-rest-auth's RegisterSerializer to handle email registration
+        with proper validation.
+      properties:
+        email:
+          type: string
+          format: email
+        password1:
+          type: string
+          writeOnly: true
+          minLength: 8
+        password2:
+          type: string
+          writeOnly: true
+          minLength: 8
+        first_name:
+          type: string
+          maxLength: 30
+        last_name:
+          type: string
+          maxLength: 30
+      required:
+      - email
+      - first_name
+      - last_name
+      - password1
+      - password2
+    ResendEmailVerification:
+      type: object
+      properties:
+        email:
+          type: string
+          format: email
+      required:
+      - email
+    RestAuthDetail:
+      type: object
+      properties:
+        detail:
+          type: string
+          readOnly: true
+      required:
+      - detail
+    StatusEnum:
+      enum:
+      - pending
+      - success
+      - failed
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `success` - Success
+        * `failed` - Failed
+    UserDetails:
+      type: object
+      description: |-
+        Serializer for detailed user profile information.
+
+        Used for user profile endpoints and detailed user information.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        email:
+          type: string
+          format: email
+          title: Email address
+          description: Required. Enter a valid email address.
+          maxLength: 254
+        first_name:
+          type: string
+          maxLength: 150
+        last_name:
+          type: string
+          maxLength: 150
+        is_active:
+          type: boolean
+          readOnly: true
+          title: Active
+          description: Designates whether this user should be treated as active. Unselect
+            this instead of deleting accounts.
+        date_joined:
+          type: string
+          format: date-time
+          readOnly: true
+        last_login:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - date_joined
+      - email
+      - id
+      - is_active
+      - last_login
+    UserMFAMethod:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 255
+        is_primary:
+          type: boolean
+      required:
+      - name
+    VerifyEmail:
+      type: object
+      properties:
+        key:
+          type: string
+          writeOnly: true
+      required:
+      - key
+    VoiceUploadResponse:
+      type: object
+      properties:
+        voice_input_id:
+          type: integer
+          description: ID of the created VoiceInput record
+        analysis:
+          $ref: '#/components/schemas/LLMAnalysis'
+        meal:
+          $ref: '#/components/schemas/Meal'
+      required:
+      - analysis
+      - meal
+      - voice_input_id
+    WeeklyStatsResponse:
+      type: object
+      properties:
+        week:
+          type: string
+          description: ISO week identifier (YYYY-WNN)
+        week_start:
+          type: string
+          format: date
+          description: First day of the week (Monday)
+        week_end:
+          type: string
+          format: date
+          description: Last day of the week (Sunday)
+        total_calories:
+          type: number
+          format: double
+          description: Total calories for the week
+        average_daily_calories:
+          type: number
+          format: double
+          description: Average daily calories
+        meal_count:
+          type: integer
+          description: Total meals in the week
+        daily_breakdown:
+          type: object
+          additionalProperties: {}
+          description: Per-day breakdown with date, calories, meal_count
+      required:
+      - average_daily_calories
+      - daily_breakdown
+      - meal_count
+      - total_calories
+      - week
+      - week_end
+      - week_start
+  securitySchemes:
+    TokenAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: 'Token based auth. Use: Token <your_key>'
+servers:
+- url: http://localhost:8000
+  description: Local
