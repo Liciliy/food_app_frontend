@@ -5,8 +5,14 @@
  */
 
 import { useMemo, useState, useRef, useEffect } from 'react';
-import { Clock, Coffee, Sunrise, Sun, Sunset, Moon, X } from 'lucide-react';
+import { Clock, Coffee, Sunrise, Sun, Sunset, Moon, X, Trash2, Loader2, Utensils, Flame } from 'lucide-react';
 import type { Meal } from '../../types';
+import { useMealStore } from '../../stores/mealStore';
+import { formatTime, formatCalories, formatMacros, capitalize } from '../../utils';
+import { cn } from '../../utils';
+
+/** Delete window in seconds (3 hours) */
+const DELETE_WINDOW_SECONDS = 3 * 60 * 60;
 
 interface DayTimelineProps {
   meals: Meal[];
@@ -101,6 +107,35 @@ function getMealTypeColor(mealType: string): string {
   return colors[mealType] || 'bg-gray-500';
 }
 
+/**
+ * Get meal type style for badge
+ */
+function getMealTypeStyle(mealType: string): { bgColor: string; textColor: string; icon: string } {
+  switch (mealType) {
+    case 'breakfast':
+      return { bgColor: 'bg-yellow-100', textColor: 'text-yellow-700', icon: '🌅' };
+    case 'lunch':
+      return { bgColor: 'bg-orange-100', textColor: 'text-orange-700', icon: '☀️' };
+    case 'dinner':
+      return { bgColor: 'bg-purple-100', textColor: 'text-purple-700', icon: '🌙' };
+    case 'snack':
+      return { bgColor: 'bg-green-100', textColor: 'text-green-700', icon: '🍎' };
+    default:
+      return { bgColor: 'bg-gray-100', textColor: 'text-gray-700', icon: '🍽️' };
+  }
+}
+
+/**
+ * Check if a meal can be deleted (within 3 hours of creation)
+ * Uses consumed_at as a proxy for creation time since meals are logged close to consumption
+ */
+function canDeleteMeal(meal: Meal): boolean {
+  if (!meal.consumed_at) return false;
+  const consumedAt = new Date(meal.consumed_at).getTime();
+  const elapsed = (Date.now() - consumedAt) / 1000;
+  return elapsed < DELETE_WINDOW_SECONDS;
+}
+
 interface MealPosition {
   meal: Meal;
   hour: number;
@@ -113,13 +148,18 @@ interface MealPosition {
 export function DayTimeline({ meals, isLoading }: DayTimelineProps) {
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
   const [hoveredMealId, setHoveredMealId] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const selectedCardRef = useRef<HTMLDivElement>(null);
+  
+  const { deleteMeal } = useMealStore();
 
   // Close details when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (selectedCardRef.current && !selectedCardRef.current.contains(event.target as Node)) {
         setSelectedMeal(null);
+        setShowDeleteConfirm(false);
       }
     };
 
@@ -330,7 +370,10 @@ export function DayTimeline({ meals, isLoading }: DayTimelineProps) {
               {/* Meal card */}
               <div className="relative flex-1">
                 <div 
-                  onClick={() => setSelectedMeal(isSelected ? null : mealPos.meal)}
+                  onClick={() => {
+                    setSelectedMeal(isSelected ? null : mealPos.meal);
+                    setShowDeleteConfirm(false);
+                  }}
                   className={`bg-white/95 backdrop-blur-sm border rounded shadow-sm hover:shadow-md transition-all cursor-pointer ${
                     isSelected 
                       ? 'border-indigo-500 shadow-lg' 
@@ -392,102 +435,199 @@ export function DayTimeline({ meals, isLoading }: DayTimelineProps) {
                   </div>
                 )}
 
-                {/* Expanded view */}
-                {isSelected && (
-                  <div className="p-3 max-h-48 overflow-y-auto">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${getMealTypeColor(mealPos.meal.meal_type)}`} />
-                        <span className="font-bold text-gray-900">
-                          {getMealTypeName(mealPos.meal.meal_type)}
-                        </span>
-                      </div>
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedMeal(null);
-                        }}
-                        className="text-gray-400 hover:text-gray-600"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-
-                    {mealPos.meal.description && (
-                      <p className="text-xs text-gray-700 mb-2 leading-relaxed">
-                        {mealPos.meal.description}
-                      </p>
-                    )}
-
-                    <div className="space-y-2">
-                      {mealPos.meal.total_calories && (
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-600">Calories</span>
-                          <span className="font-bold text-gray-900">
-                            {typeof mealPos.meal.total_calories === 'string'
-                              ? parseFloat(mealPos.meal.total_calories).toFixed(0)
-                              : mealPos.meal.total_calories.toFixed(0)} cal
+                {/* Expanded view - MealCard style */}
+                {isSelected && (() => {
+                  const meal = mealPos.meal;
+                  const mealStyle = getMealTypeStyle(meal.meal_type || 'unknown');
+                  const consumedTime = meal.consumed_at ? formatTime(meal.consumed_at) : '--:--';
+                  const showDeleteButton = canDeleteMeal(meal);
+                  
+                  const handleDeleteClick = (e: React.MouseEvent) => {
+                    e.stopPropagation();
+                    setShowDeleteConfirm(true);
+                  };
+                  
+                  const handleConfirmDelete = async (e: React.MouseEvent) => {
+                    e.stopPropagation();
+                    setIsDeleting(true);
+                    const success = await deleteMeal(meal.id);
+                    setIsDeleting(false);
+                    setShowDeleteConfirm(false);
+                    if (success) {
+                      setSelectedMeal(null);
+                    }
+                  };
+                  
+                  const handleCancelDelete = (e: React.MouseEvent) => {
+                    e.stopPropagation();
+                    setShowDeleteConfirm(false);
+                  };
+                  
+                  return (
+                    <div className="p-4 max-h-64 overflow-y-auto">
+                      {/* Header with delete button */}
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center space-x-2">
+                          <span className={cn(
+                            'px-2 py-1 rounded-full text-xs font-medium',
+                            mealStyle.bgColor,
+                            mealStyle.textColor
+                          )}>
+                            {mealStyle.icon} {capitalize(meal.meal_type || 'unknown')}
                           </span>
+                          <div className="flex items-center text-xs text-gray-500">
+                            <Clock className="w-3 h-3 mr-1" />
+                            {consumedTime}
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-1">
+                          {/* Delete button - only show if within delete window */}
+                          {showDeleteButton && !showDeleteConfirm && (
+                            <button 
+                              onClick={handleDeleteClick}
+                              className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                              title="Delete meal"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
+                          <button 
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedMeal(null);
+                              setShowDeleteConfirm(false);
+                            }}
+                            className="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                      
+                      {/* Delete confirmation */}
+                      {showDeleteConfirm && (
+                        <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded-lg">
+                          <p className="text-xs text-red-700 mb-2">Delete this meal? This cannot be undone.</p>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={handleConfirmDelete}
+                              disabled={isDeleting}
+                              className="flex-1 px-2 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded disabled:opacity-50 flex items-center justify-center"
+                            >
+                              {isDeleting ? (
+                                <>
+                                  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                                  Deleting...
+                                </>
+                              ) : (
+                                'Delete'
+                              )}
+                            </button>
+                            <button
+                              onClick={handleCancelDelete}
+                              disabled={isDeleting}
+                              className="flex-1 px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs rounded disabled:opacity-50"
+                            >
+                              Cancel
+                            </button>
+                          </div>
                         </div>
                       )}
                       
-                      {mealPos.meal.macros && (
-                        <>
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-blue-600">Protein</span>
-                            <span className="font-semibold text-blue-700">{mealPos.meal.macros.protein.toFixed(1)}g</span>
-                          </div>
-                          <div className="w-full h-2 bg-gray-100 rounded-full">
-                            <div 
-                              className="h-full bg-blue-500 rounded-full"
-                              style={{ width: `${Math.min((mealPos.meal.macros.protein / 40) * 100, 100)}%` }}
-                            />
-                          </div>
+                      {/* Calories */}
+                      <div className="flex items-center text-primary-600 font-semibold mb-3">
+                        <Flame className="w-4 h-4 mr-1" />
+                        {formatCalories(meal.total_calories)} cal
+                      </div>
 
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-amber-600">Carbs</span>
-                            <span className="font-semibold text-amber-700">{mealPos.meal.macros.carbs.toFixed(1)}g</span>
-                          </div>
-                          <div className="w-full h-2 bg-gray-100 rounded-full">
-                            <div 
-                              className="h-full bg-amber-500 rounded-full"
-                              style={{ width: `${Math.min((mealPos.meal.macros.carbs / 80) * 100, 100)}%` }}
-                            />
-                          </div>
+                      {/* Description */}
+                      {meal.description && (
+                        <p className="text-sm text-gray-700 mb-3 line-clamp-2">
+                          {meal.description}
+                        </p>
+                      )}
 
-                          <div className="flex items-center justify-between text-xs">
-                            <span className="text-rose-600">Fat</span>
-                            <span className="font-semibold text-rose-700">{mealPos.meal.macros.fat.toFixed(1)}g</span>
+                      {/* Food Items */}
+                      {meal.food_items && meal.food_items.length > 0 && (
+                        <div className="space-y-2 mb-3">
+                          <div className="flex items-center text-xs text-gray-500 mb-1">
+                            <Utensils className="w-3 h-3 mr-1" />
+                            {meal.food_items.length} items
                           </div>
-                          <div className="w-full h-2 bg-gray-100 rounded-full">
-                            <div 
-                              className="h-full bg-rose-500 rounded-full"
-                              style={{ width: `${Math.min((mealPos.meal.macros.fat / 40) * 100, 100)}%` }}
-                            />
+                          <div className="flex flex-wrap gap-1">
+                            {meal.food_items.slice(0, 5).map((item) => (
+                              <span
+                                key={item.id}
+                                className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-700 text-xs rounded-full"
+                              >
+                                {item.name_in_english || item.name}
+                                <span className="ml-1 text-gray-500">
+                                  ({formatCalories(item.calories_total)})
+                                </span>
+                              </span>
+                            ))}
+                            {meal.food_items.length > 5 && (
+                              <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-500 text-xs rounded-full">
+                                +{meal.food_items.length - 5} more
+                              </span>
+                            )}
                           </div>
-                        </>
+                        </div>
+                      )}
+
+                      {/* Macros */}
+                      {meal.macros && (
+                        <div className="flex items-center space-x-4 pt-2 border-t border-gray-100">
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-gray-500">Protein</span>
+                              <span className="font-medium text-blue-600">
+                                {formatMacros(meal.macros.protein ?? 0)}
+                              </span>
+                            </div>
+                            <div className="w-full h-1 bg-gray-200 rounded-full mt-1">
+                              <div 
+                                className="h-full bg-blue-500 rounded-full"
+                                style={{ width: `${Math.min(((meal.macros.protein ?? 0) / 50) * 100, 100)}%` }}
+                              />
+                            </div>
+                          </div>
+                          
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-gray-500">Carbs</span>
+                              <span className="font-medium text-yellow-600">
+                                {formatMacros(meal.macros.carbs ?? 0)}
+                              </span>
+                            </div>
+                            <div className="w-full h-1 bg-gray-200 rounded-full mt-1">
+                              <div 
+                                className="h-full bg-yellow-500 rounded-full"
+                                style={{ width: `${Math.min(((meal.macros.carbs ?? 0) / 100) * 100, 100)}%` }}
+                              />
+                            </div>
+                          </div>
+                          
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-gray-500">Fat</span>
+                              <span className="font-medium text-red-600">
+                                {formatMacros(meal.macros.fat ?? 0)}
+                              </span>
+                            </div>
+                            <div className="w-full h-1 bg-gray-200 rounded-full mt-1">
+                              <div 
+                                className="h-full bg-red-500 rounded-full"
+                                style={{ width: `${Math.min(((meal.macros.fat ?? 0) / 50) * 100, 100)}%` }}
+                              />
+                            </div>
+                          </div>
+                        </div>
                       )}
                     </div>
-
-                    {mealPos.meal.food_items && mealPos.meal.food_items.length > 0 && (
-                      <div className="mt-3 pt-2 border-t border-gray-200">
-                        <div className="text-xs font-semibold text-gray-600 mb-1">
-                          {mealPos.meal.food_items.length} items:
-                        </div>
-                        <div className="flex flex-wrap gap-1">
-                          {mealPos.meal.food_items.map((item) => (
-                            <span
-                              key={item.id}
-                              className="inline-block px-1.5 py-0.5 bg-gray-100 text-gray-700 text-[10px] rounded"
-                            >
-                              {item.name_in_english || item.name}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
+                  );
+                })()}
                 </div>
                 
                 {/* Hover tooltip with description */}

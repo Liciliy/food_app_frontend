@@ -42,6 +42,19 @@ interface RevertMealResponse {
 }
 
 /**
+ * Delete meal API response structure
+ */
+interface DeleteMealResponse {
+  message: string;
+  meal_id: number;
+  voice_input_id: number;
+  llm_analysis_id: number;
+  time_extraction_id: number | null;
+  food_items_deleted: number;
+  deleted_at: string;
+}
+
+/**
  * Meal service class
  * Provides methods for meal management and voice recording upload
  */
@@ -160,6 +173,17 @@ export class MealService {
    */
   static async revertMeal(mealId: number): Promise<RevertMealResponse> {
     const response = await apiClient.post<RevertMealResponse>(`/food/meals/${mealId}/revert/`);
+    return response.data;
+  }
+
+  /**
+   * Delete a meal within the allowed time window
+   * Only available within 3 hours after meal creation
+   * @param mealId - Meal ID to delete
+   * @returns Promise with delete response
+   */
+  static async deleteMeal(mealId: number): Promise<DeleteMealResponse> {
+    const response = await apiClient.delete<DeleteMealResponse>(`/food/meals/${mealId}/delete/`);
     return response.data;
   }
 }

@@ -44,6 +44,7 @@ interface MealActions {
   
   // Meal management
   revertMeal: (mealId: number) => Promise<boolean>;
+  deleteMeal: (mealId: number) => Promise<boolean>;
   
   // Meal fetching
   fetchMeals: (params?: { date?: string; date_from?: string; date_to?: string }) => Promise<void>;
@@ -168,15 +169,23 @@ export const useMealStore = create<MealStore>((set, get) => ({
       const currentMeal = get().currentMeal;
       const newCurrentMeal = currentMeal?.id === mealId ? null : currentMeal;
       
+      // Also update dailyStats.meals to reflect the revert immediately
+      const currentDailyStats = get().dailyStats;
+      const updatedDailyStats = currentDailyStats ? {
+        ...currentDailyStats,
+        meals: currentDailyStats.meals?.filter(meal => meal.id !== mealId) || [],
+      } : null;
+      
       logger.state('mealStore', 'revertMeal:success', { mealId, foodItemsDeleted: response.food_items_deleted });
       
       set({
         meals: updatedMeals,
         currentMeal: newCurrentMeal,
+        dailyStats: updatedDailyStats,
         successMessage: `Meal undone. ${response.food_items_deleted} food items removed.`,
       });
       
-      // Refresh dashboard data in background
+      // Refresh dashboard data in background to get updated totals
       get().fetchDashboard(true).catch(() => {
         // Silently ignore dashboard refresh errors
       });
@@ -188,6 +197,58 @@ export const useMealStore = create<MealStore>((set, get) => ({
       const errorMessage = typeof apiError === 'object' && apiError?.detail 
         ? apiError.detail 
         : 'Failed to undo meal. The undo window may have expired.';
+      set({ error: errorMessage });
+      return false;
+    }
+  },
+
+  /**
+   * Delete a meal within the allowed time window (3 hours)
+   */
+  deleteMeal: async (mealId: number) => {
+    logger.state('mealStore', 'deleteMeal:start', { mealId });
+    
+    try {
+      logger.api('DELETE', `/food/meals/${mealId}/delete/`, {});
+      const response = await MealService.deleteMeal(mealId);
+      logger.apiResponse('DELETE', `/food/meals/${mealId}/delete/`, 200, response);
+      
+      // Remove the deleted meal from the list
+      const currentMeals = get().meals;
+      const updatedMeals = currentMeals.filter(meal => meal.id !== mealId);
+      
+      // Clear currentMeal if it was the deleted one
+      const currentMeal = get().currentMeal;
+      const newCurrentMeal = currentMeal?.id === mealId ? null : currentMeal;
+      
+      // Also update dailyStats.meals to reflect the deletion immediately
+      const currentDailyStats = get().dailyStats;
+      const updatedDailyStats = currentDailyStats ? {
+        ...currentDailyStats,
+        meals: currentDailyStats.meals?.filter(meal => meal.id !== mealId) || [],
+      } : null;
+      
+      logger.state('mealStore', 'deleteMeal:success', { mealId, foodItemsDeleted: response.food_items_deleted });
+      
+      set({
+        meals: updatedMeals,
+        currentMeal: newCurrentMeal,
+        dailyStats: updatedDailyStats,
+        successMessage: `Meal deleted. ${response.food_items_deleted} food items removed.`,
+      });
+      
+      // Refresh dashboard data in background to get updated totals
+      get().fetchDashboard(true).catch(() => {
+        // Silently ignore dashboard refresh errors
+      });
+      
+      return true;
+    } catch (error) {
+      logger.error('deleteMeal failed:', error);
+      const apiError = error as ApiError;
+      const errorMessage = typeof apiError === 'object' && apiError?.detail 
+        ? apiError.detail 
+        : 'Failed to delete meal. The delete window may have expired.';
       set({ error: errorMessage });
       return false;
     }

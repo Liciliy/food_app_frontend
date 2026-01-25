@@ -664,6 +664,45 @@ paths:
               schema:
                 $ref: '#/components/schemas/Meal'
           description: ''
+  /api/food/meals/{id}/delete/:
+    delete:
+      operationId: food_meals_delete_destroy
+      description: |-
+        Delete a meal within 3 hours of creation. This operation:
+        - Deletes all food items associated with the meal
+        - Redacts sensitive text from analysis records (transcription, prompts, responses)
+        - Marks the meal as deleted (excluded from statistics)
+
+        The delete window is 3 hours after meal creation. After this window, the meal cannot be deleted.
+
+        Analysis metadata (token counts, costs, latencies) is preserved for usage statistics.
+      summary: Delete meal
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this meal.
+        required: true
+      tags:
+      - Food Logging
+      security:
+      - TokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteMealResponse'
+          description: Meal successfully deleted
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DeleteMealErrorResponse'
+          description: Delete window expired or meal already deleted/reverted
+        '404':
+          description: Meal not found
   /api/food/meals/{id}/revert/:
     post:
       operationId: food_meals_revert_create
@@ -1116,6 +1155,50 @@ components:
       - meal_count
       - week_end
       - week_start
+    DeleteMealErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+      required:
+      - error
+    DeleteMealResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Success message
+        meal_id:
+          type: integer
+          description: ID of the deleted meal
+        voice_input_id:
+          type: integer
+          nullable: true
+          description: ID of the associated voice input
+        llm_analysis_id:
+          type: integer
+          nullable: true
+          description: ID of the associated LLM analysis
+        time_extraction_id:
+          type: integer
+          nullable: true
+          description: ID of the time extraction analysis
+        food_items_deleted:
+          type: integer
+          description: Number of food items deleted
+        deleted_at:
+          type: string
+          format: date-time
+          description: Timestamp of the delete operation
+      required:
+      - deleted_at
+      - food_items_deleted
+      - llm_analysis_id
+      - meal_id
+      - message
+      - time_extraction_id
+      - voice_input_id
     DeviceToken:
       type: object
       description: |-
