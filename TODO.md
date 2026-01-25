@@ -25,7 +25,7 @@
 - [ ] Toast notifications for success/error feedback
 
 ## 🎤 Voice Recording & Meal Features (Main Feature)
-- [ ] Voice recording component (max 5 minutes)
+- [x] Voice recording component (max 5 minutes)
 - [ ] Audio upload to `/meals/voice/` endpoint
 - [ ] Meal type selector (breakfast, lunch, dinner, snack)
 - [ ] Display AI-analyzed meal data

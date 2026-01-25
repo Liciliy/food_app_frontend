@@ -29,6 +29,19 @@ interface VoiceUploadResponse {
 }
 
 /**
+ * Revert meal API response structure
+ */
+interface RevertMealResponse {
+  message: string;
+  meal_id: number;
+  voice_input_id: number;
+  llm_analysis_id: number;
+  time_extraction_id: number | null;
+  food_items_deleted: number;
+  reverted_at: string;
+}
+
+/**
  * Meal service class
  * Provides methods for meal management and voice recording upload
  */
@@ -136,6 +149,17 @@ export class MealService {
     const response = await apiClient.get<MonthlyStats>('/food/meals/stats/monthly/', {
       params: month ? { month } : undefined,
     });
+    return response.data;
+  }
+
+  /**
+   * Revert (undo) a recently created meal
+   * Only available within 20 seconds after meal analysis completes
+   * @param mealId - Meal ID to revert
+   * @returns Promise with revert response
+   */
+  static async revertMeal(mealId: number): Promise<RevertMealResponse> {
+    const response = await apiClient.post<RevertMealResponse>(`/food/meals/${mealId}/revert/`);
     return response.data;
   }
 }

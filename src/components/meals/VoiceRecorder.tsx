@@ -4,12 +4,15 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { Mic, Square, RotateCcw, Loader2, CheckCircle, Upload } from 'lucide-react';
+import { Mic, Square, RotateCcw, Loader2, CheckCircle, Upload, Undo2 } from 'lucide-react';
 import { useVoiceRecorder } from '../../hooks/useVoiceRecorder';
 import { useMealStore } from '../../stores/mealStore';
 import { Button } from '../common/Button';
 import { AudioVisualizer } from './AudioVisualizer';
 import { cn } from '../../utils';
+
+/** Time window to show revert button (in seconds) */
+const REVERT_BUTTON_DISPLAY_SECONDS = 5;
 
 /**
  * Format seconds to MM:SS display
@@ -26,9 +29,15 @@ function formatDuration(seconds: number): string {
  */
 export function VoiceRecorder() {
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showRevertButton, setShowRevertButton] = useState(false);
+  const [revertCountdown, setRevertCountdown] = useState(REVERT_BUTTON_DISPLAY_SECONDS);
+  const [isReverting, setIsReverting] = useState(false);
   const hasAutoSubmittedRef = useRef(false);
   const pressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isPressHoldRef = useRef(false);
+  const revertableMealIdRef = useRef<number | null>(null);
+  const revertTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   
   const {
     isRecording,
@@ -45,6 +54,7 @@ export function VoiceRecorder() {
 
   const {
     uploadVoiceRecording,
+    revertMeal,
     isUploading,
     error: uploadError,
     successMessage,
@@ -58,13 +68,57 @@ export function VoiceRecorder() {
   useEffect(() => {
     if (successMessage && currentMeal) {
       setShowSuccess(true);
-      const timer = setTimeout(() => {
+      
+      // Hide success message after 5 seconds
+      const successTimer = setTimeout(() => {
         setShowSuccess(false);
         clearSuccess();
       }, 5000);
-      return () => clearTimeout(timer);
+      
+      return () => {
+        clearTimeout(successTimer);
+      };
     }
   }, [successMessage, currentMeal, clearSuccess]);
+
+  // Handle revert button countdown separately
+  useEffect(() => {
+    if (successMessage && currentMeal) {
+      // Clear any existing timers
+      if (revertTimerRef.current) {
+        clearTimeout(revertTimerRef.current);
+      }
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
+      }
+      
+      setShowRevertButton(true);
+      setRevertCountdown(REVERT_BUTTON_DISPLAY_SECONDS);
+      revertableMealIdRef.current = currentMeal.id;
+      
+      // Hide revert button after countdown
+      revertTimerRef.current = setTimeout(() => {
+        setShowRevertButton(false);
+        revertableMealIdRef.current = null;
+        revertTimerRef.current = null;
+      }, REVERT_BUTTON_DISPLAY_SECONDS * 1000);
+      
+      // Countdown timer for revert button display
+      countdownIntervalRef.current = setInterval(() => {
+        setRevertCountdown(prev => {
+          if (prev <= 1) {
+            if (countdownIntervalRef.current) {
+              clearInterval(countdownIntervalRef.current);
+              countdownIntervalRef.current = null;
+            }
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    // Note: No cleanup here - we want the timers to continue even after successMessage is cleared
+  }, [successMessage, currentMeal]);
 
   // Auto-submit when recording ends
   useEffect(() => {
@@ -98,6 +152,34 @@ export function VoiceRecorder() {
       hasAutoSubmittedRef.current = false;
     }
   }, [isRecording]);
+
+  /**
+   * Handle revert/undo meal
+   */
+  const handleRevert = async () => {
+    const mealId = revertableMealIdRef.current;
+    if (!mealId || isReverting) return;
+    
+    // Clear timers
+    if (revertTimerRef.current) {
+      clearTimeout(revertTimerRef.current);
+      revertTimerRef.current = null;
+    }
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
+    
+    setIsReverting(true);
+    const success = await revertMeal(mealId);
+    setIsReverting(false);
+    
+    if (success) {
+      setShowRevertButton(false);
+      setShowSuccess(false);
+      revertableMealIdRef.current = null;
+    }
+  };
 
   /**
    * Handle button press start (mouse down / touch start)
@@ -192,11 +274,23 @@ export function VoiceRecorder() {
    * Handle reset/new recording
    */
   const handleReset = () => {
+    // Clear revert timers
+    if (revertTimerRef.current) {
+      clearTimeout(revertTimerRef.current);
+      revertTimerRef.current = null;
+    }
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+      countdownIntervalRef.current = null;
+    }
+    
     resetRecording();
     resetUploadState();
     clearError();
     clearSuccess();
     setShowSuccess(false);
+    setShowRevertButton(false);
+    revertableMealIdRef.current = null;
     hasAutoSubmittedRef.current = false;
   };
 
@@ -358,7 +452,7 @@ export function VoiceRecorder() {
         </div>
 
         {/* Instructions */}
-        {!isRecording && !audioBlob && !isUploading && (
+        {!isRecording && !audioBlob && !isUploading && !showRevertButton && (
           <div className="mt-6 text-center">
             <p className="text-xs text-gray-500 font-medium mb-2">
               Two ways to record:
@@ -374,6 +468,34 @@ export function VoiceRecorder() {
             <p className="text-xs text-gray-400 mt-3">
               Example: "I had two eggs with toast and orange juice for breakfast"
             </p>
+          </div>
+        )}
+
+        {/* Revert Button - shown at bottom after successful recording */}
+        {showRevertButton && !isReverting && (
+          <div className="mt-6 w-full">
+            <Button
+              variant="outline"
+              onClick={handleRevert}
+              className="w-full flex items-center justify-center text-amber-700 border-amber-300 hover:bg-amber-50 hover:border-amber-400"
+            >
+              <Undo2 className="w-4 h-4 mr-2" />
+              Undo meal ({revertCountdown}s)
+            </Button>
+          </div>
+        )}
+        
+        {/* Reverting state */}
+        {isReverting && (
+          <div className="mt-6 w-full">
+            <Button
+              variant="outline"
+              disabled
+              className="w-full flex items-center justify-center"
+            >
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              Undoing...
+            </Button>
           </div>
         )}
       </div>

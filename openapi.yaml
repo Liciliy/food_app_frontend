@@ -664,6 +664,56 @@ paths:
               schema:
                 $ref: '#/components/schemas/Meal'
           description: ''
+  /api/food/meals/{id}/revert/:
+    post:
+      operationId: food_meals_revert_create
+      description: |-
+        Revert a recently created meal. This operation:
+        - Deletes all food items associated with the meal
+        - Redacts sensitive text from analysis records (transcription, prompts, responses)
+        - Marks the meal as reverted (excluded from statistics)
+
+        The revert window is 20 seconds after meal analysis completion. After this window, the meal cannot be reverted.
+
+        Analysis metadata (token counts, costs, latencies) is preserved for usage statistics.
+      summary: Revert meal
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this meal.
+        required: true
+      tags:
+      - Food Logging
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Meal'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Meal'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Meal'
+      security:
+      - TokenAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevertMealResponse'
+          description: Meal successfully reverted
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevertMealErrorResponse'
+          description: Revert window expired or meal already reverted
+        '404':
+          description: Meal not found
   /api/food/meals/dashboard/:
     get:
       operationId: food_meals_dashboard_retrieve
@@ -749,9 +799,10 @@ paths:
   /api/food/voice-inputs/upload/:
     post:
       operationId: food_voice_inputs_upload_create
-      description: Upload an audio file to create a meal with AI-powered nutritional
-        analysis. The audio is transcribed using Whisper, analyzed by GPT-4o-mini,
-        and a Meal record is created with itemized food data.
+      description: |-
+        Upload an audio file to create a meal with AI-powered nutritional analysis. The audio is transcribed using Whisper, analyzed by GPT-4o-mini, and a Meal record is created with itemized food data.
+
+        Optionally provide client_timestamp and client_timezone to enable accurate meal consumption time detection from natural language (e.g., "yesterday at dinner", "this morning").
       summary: Upload a voice input for transcription and analysis
       tags:
       - Food Logging
@@ -766,6 +817,16 @@ paths:
                   format: binary
                   description: Audio file (WAV, MP3, M4A, OGG, WebM, AAC). Also accepts
                     "file" as field name.
+                client_timestamp:
+                  type: string
+                  format: date-time
+                  description: User's current local datetime in ISO 8601 format (e.g.,
+                    "2026-01-24T14:30:00"). Used for resolving relative time references
+                    like "yesterday".
+                client_timezone:
+                  type: string
+                  description: User's timezone in IANA format (e.g., "Europe/Kyiv",
+                    "America/New_York"). Stored with the meal for accurate time tracking.
               required:
               - audio
       security:
@@ -1362,6 +1423,16 @@ components:
           type: string
           nullable: true
           description: Free-form notes or the original parsed phrase.
+        user_timezone:
+          type: string
+          readOnly: true
+          nullable: true
+          description: User timezone at meal logging (IANA format, e.g., Europe/Kyiv).
+        consumed_at_raw:
+          type: string
+          readOnly: true
+          nullable: true
+          description: Raw time reference extracted from user input (for debugging).
         items:
           type: array
           items:
@@ -1378,6 +1449,7 @@ components:
           readOnly: true
           description: Last update timestamp.
       required:
+      - consumed_at_raw
       - created_at
       - id
       - items
@@ -1387,6 +1459,7 @@ components:
       - total_calories
       - updated_at
       - user
+      - user_timezone
     MealTypeEnum:
       enum:
       - unknown
@@ -1570,6 +1643,50 @@ components:
           readOnly: true
       required:
       - detail
+    RevertMealErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+      required:
+      - error
+    RevertMealResponse:
+      type: object
+      properties:
+        message:
+          type: string
+          description: Success message
+        meal_id:
+          type: integer
+          description: ID of the reverted meal
+        voice_input_id:
+          type: integer
+          nullable: true
+          description: ID of the associated voice input
+        llm_analysis_id:
+          type: integer
+          nullable: true
+          description: ID of the associated LLM analysis
+        time_extraction_id:
+          type: integer
+          nullable: true
+          description: ID of the time extraction analysis
+        food_items_deleted:
+          type: integer
+          description: Number of food items deleted
+        reverted_at:
+          type: string
+          format: date-time
+          description: Timestamp of the revert operation
+      required:
+      - food_items_deleted
+      - llm_analysis_id
+      - meal_id
+      - message
+      - reverted_at
+      - time_extraction_id
+      - voice_input_id
     StatusEnum:
       enum:
       - pending

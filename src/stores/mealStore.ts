@@ -42,6 +42,9 @@ interface MealActions {
   // Voice recording & meal creation
   uploadVoiceRecording: (audioFile: File) => Promise<Meal | null>;
   
+  // Meal management
+  revertMeal: (mealId: number) => Promise<boolean>;
+  
   // Meal fetching
   fetchMeals: (params?: { date?: string; date_from?: string; date_to?: string }) => Promise<void>;
   fetchMealById: (mealId: number) => Promise<void>;
@@ -143,6 +146,50 @@ export const useMealStore = create<MealStore>((set, get) => ({
         error: errorMessage,
       });
       return null;
+    }
+  },
+
+  /**
+   * Revert (undo) a recently created meal
+   */
+  revertMeal: async (mealId: number) => {
+    logger.state('mealStore', 'revertMeal:start', { mealId });
+    
+    try {
+      logger.api('POST', `/food/meals/${mealId}/revert/`, {});
+      const response = await MealService.revertMeal(mealId);
+      logger.apiResponse('POST', `/food/meals/${mealId}/revert/`, 200, response);
+      
+      // Remove the reverted meal from the list
+      const currentMeals = get().meals;
+      const updatedMeals = currentMeals.filter(meal => meal.id !== mealId);
+      
+      // Clear currentMeal if it was the reverted one
+      const currentMeal = get().currentMeal;
+      const newCurrentMeal = currentMeal?.id === mealId ? null : currentMeal;
+      
+      logger.state('mealStore', 'revertMeal:success', { mealId, foodItemsDeleted: response.food_items_deleted });
+      
+      set({
+        meals: updatedMeals,
+        currentMeal: newCurrentMeal,
+        successMessage: `Meal undone. ${response.food_items_deleted} food items removed.`,
+      });
+      
+      // Refresh dashboard data in background
+      get().fetchDashboard(true).catch(() => {
+        // Silently ignore dashboard refresh errors
+      });
+      
+      return true;
+    } catch (error) {
+      logger.error('revertMeal failed:', error);
+      const apiError = error as ApiError;
+      const errorMessage = typeof apiError === 'object' && apiError?.detail 
+        ? apiError.detail 
+        : 'Failed to undo meal. The undo window may have expired.';
+      set({ error: errorMessage });
+      return false;
     }
   },
 
