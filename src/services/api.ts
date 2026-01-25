@@ -1,6 +1,13 @@
 /**
  * API Configuration and Base Setup
- * Configures Axios instance with base URL, interceptors, and error handling
+ * 
+ * This module configures the Axios HTTP client with:
+ * - Base URL from environment variables
+ * - Automatic authentication token injection
+ * - Consistent error handling and formatting
+ * - Request/response interceptors
+ * 
+ * @module services/api
  */
 
 import axios, { type AxiosResponse, type AxiosError } from 'axios';
@@ -8,13 +15,28 @@ import type { ApiError } from '../types';
 
 /**
  * Base URL for the Food Tracking API
- * Change this to match your backend server URL
+ * Configured via VITE_API_BASE_URL environment variable
+ * Defaults to localhost:8000/api for development
+ * 
+ * @example
+ * // In .env file:
+ * // VITE_API_BASE_URL=https://api.yourfoodtracker.com/api
  */
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
 
 /**
  * Configured Axios instance for API calls
- * Includes automatic token injection and response/error interceptors
+ * 
+ * Features:
+ * - Automatic token injection via request interceptor
+ * - Global 401 handling (redirects to login)
+ * - Consistent error formatting
+ * - 30 second timeout for standard requests
+ * 
+ * @example
+ * ```ts
+ * const response = await apiClient.get('/food/meals/');
+ * ```
  */
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,

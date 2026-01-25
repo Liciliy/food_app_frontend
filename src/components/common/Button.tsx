@@ -1,22 +1,44 @@
 /**
  * Button Component
- * Reusable button with different variants and states
+ * Reusable button with multiple variants, sizes, and loading state
  */
 
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
 import { LoadingSpinner } from './LoadingSpinner';
 import { cn } from '../../utils';
 
+/**
+ * Props for the Button component
+ * Extends standard HTML button attributes
+ */
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+  /** Visual style variant
+   * - 'primary': Solid background, primary color (default)
+   * - 'secondary': Light background, muted color
+   * - 'outline': Bordered, transparent background
+   * - 'ghost': No border/background, text only
+   */
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
+  /** Button size: 'sm', 'md' (default), 'lg' */
   size?: 'sm' | 'md' | 'lg';
+  /** Shows loading spinner and disables button when true */
   isLoading?: boolean;
+  /** Button content */
   children: ReactNode;
+  /** Additional CSS classes */
   className?: string;
 }
 
 /**
- * Button component with multiple variants and loading state
+ * Button component with multiple variants, sizes, and loading state
+ * Automatically disabled when isLoading is true
+ * 
+ * @example
+ * ```tsx
+ * <Button variant="primary" isLoading={submitting}>
+ *   Submit
+ * </Button>
+ * ```
  */
 export function Button({
   variant = 'primary',

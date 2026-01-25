@@ -1,18 +1,28 @@
 /**
  * Loading Spinner Component
- * Reusable loading indicator with different sizes
+ * Animated loading indicator with configurable sizes
  */
 
 import { cn } from '../../utils';
 
+/**
+ * Props for the LoadingSpinner component
+ */
 interface LoadingSpinnerProps {
+  /** Size of the spinner: 'sm' (16px), 'md' (24px), 'lg' (32px) */
   size?: 'sm' | 'md' | 'lg';
+  /** Additional CSS classes */
   className?: string;
 }
 
 /**
- * Loading spinner component
- * Shows animated spinning indicator
+ * Animated loading spinner component
+ * Includes proper accessibility attributes (role="status", aria-label)
+ * 
+ * @example
+ * ```tsx
+ * <LoadingSpinner size="lg" />
+ * ```
  */
 export function LoadingSpinner({ size = 'md', className }: LoadingSpinnerProps) {
   const sizeClasses = {

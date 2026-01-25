@@ -1,22 +1,42 @@
 /**
  * Input Field Component
- * Reusable input field with validation states and labels
+ * Reusable input field with validation states, labels, and icon support
  */
 
 import type { InputHTMLAttributes, ReactNode } from 'react';
 import { cn } from '../../utils';
 
+/**
+ * Props for the InputField component
+ * Extends standard HTML input attributes
+ */
 interface InputFieldProps extends InputHTMLAttributes<HTMLInputElement> {
+  /** Label text displayed above the input */
   label?: string;
+  /** Error message displayed below the input (triggers error styling) */
   error?: string;
+  /** Helper text displayed below the input when no error */
   helperText?: string;
+  /** Icon element displayed on the left side of the input */
   leftIcon?: ReactNode;
+  /** Icon element displayed on the right side of the input */
   rightIcon?: ReactNode;
+  /** Additional CSS classes for the input element */
   className?: string;
 }
 
 /**
- * Input field component with label, error states, and icons
+ * Input field component with label, validation states, and icon support
+ * 
+ * @example
+ * ```tsx
+ * <InputField
+ *   label="Email"
+ *   type="email"
+ *   error={errors.email?.message}
+ *   leftIcon={<MailIcon />}
+ * />
+ * ```
  */
 export function InputField({
   label,
