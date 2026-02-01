@@ -3,9 +3,10 @@
  * Handles user registration with email and password confirmation
  */
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { Mail, Lock, Eye, EyeOff, User, CheckCircle } from 'lucide-react';
 import { Button } from '../common/Button';
@@ -14,38 +15,36 @@ import { useAuthStore } from '../../stores/authStore';
 import type { RegisterRequest } from '../../types';
 
 /**
- * Registration form validation schema
+ * Registration form validation schema factory
  */
-const registerSchema = z.object({
+const createRegisterSchema = (t: (key: string, options?: Record<string, unknown>) => string) => z.object({
   first_name: z
     .string()
-    .min(1, 'First name is required')
-    .max(50, 'First name must be less than 50 characters'),
+    .min(1, t('validation.firstNameRequired'))
+    .max(50, t('validation.firstNameMax', { max: 50 })),
   last_name: z
     .string()
-    .min(1, 'Last name is required')
-    .max(50, 'Last name must be less than 50 characters'),
+    .min(1, t('validation.lastNameRequired'))
+    .max(50, t('validation.lastNameMax', { max: 50 })),
   email: z
     .string()
-    .min(1, 'Email is required')
-    .email('Please enter a valid email address'),
+    .min(1, t('validation.emailRequired'))
+    .email(t('validation.emailInvalid')),
   password1: z
     .string()
-    .min(1, 'Password is required')
-    .min(8, 'Password must be at least 8 characters')
+    .min(1, t('validation.passwordRequired'))
+    .min(8, t('validation.passwordMin', { min: 8 }))
     .regex(
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-      'Password must contain at least one uppercase letter, one lowercase letter, and one number'
+      t('validation.passwordStrength')
     ),
   password2: z
     .string()
-    .min(1, 'Password confirmation is required'),
+    .min(1, t('validation.passwordConfirmRequired')),
 }).refine((data) => data.password1 === data.password2, {
-  message: "Passwords don't match",
+  message: t('validation.passwordMismatch'),
   path: ["password2"],
 });
-
-type RegisterFormData = z.infer<typeof registerSchema>;
 
 interface RegisterFormProps {
   onSwitchToLogin?: () => void;
@@ -56,10 +55,15 @@ interface RegisterFormProps {
  * Provides user registration with email and password confirmation
  */
 export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
+  const { t } = useTranslation('auth');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [registrationComplete, setRegistrationComplete] = useState(false);
   const { register: registerUser, isLoading, error, successMessage, clearError, clearSuccess } = useAuthStore();
+
+  // Create schema with translations - memoized to avoid re-creating on every render
+  const registerSchema = useMemo(() => createRegisterSchema(t), [t]);
+  type RegisterFormData = z.infer<typeof registerSchema>;
 
   const {
     register,
@@ -110,19 +114,19 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
             <CheckCircle className="w-8 h-8 text-green-600" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Check Your Email
+            {t('register.checkEmail.title')}
           </h1>
           <p className="text-gray-600 mb-6">
             {successMessage}
           </p>
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
             <p className="text-sm text-blue-800">
-              <strong>Tip:</strong> If you don't see the email, check your spam folder.
+              <strong>{t('register.checkEmail.tip')}</strong> {t('register.checkEmail.tipText')}
             </p>
           </div>
           {onSwitchToLogin && (
             <Button onClick={onSwitchToLogin} className="w-full">
-              Go to Login
+              {t('register.checkEmail.goToLogin')}
             </Button>
           )}
         </div>
@@ -135,10 +139,10 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
       <div className="card">
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Create Account
+            {t('register.title')}
           </h1>
           <p className="text-gray-600">
-            Join us to start tracking your meals with AI
+            {t('register.subtitle')}
           </p>
         </div>
 
@@ -151,17 +155,17 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <InputField
-              label="First Name"
+              label={t('register.firstName')}
               type="text"
-              placeholder="John"
+              placeholder={t('register.firstNamePlaceholder')}
               leftIcon={<User />}
               error={errors.first_name?.message}
               {...register('first_name')}
             />
             <InputField
-              label="Last Name"
+              label={t('register.lastName')}
               type="text"
-              placeholder="Doe"
+              placeholder={t('register.lastNamePlaceholder')}
               leftIcon={<User />}
               error={errors.last_name?.message}
               {...register('last_name')}
@@ -169,9 +173,9 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
           </div>
 
           <InputField
-            label="Email Address"
+            label={t('register.email')}
             type="email"
-            placeholder="Enter your email"
+            placeholder={t('register.emailPlaceholder')}
             leftIcon={<Mail />}
             error={errors.email?.message}
             {...register('email')}
@@ -179,9 +183,9 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
 
           <div className="relative">
             <InputField
-              label="Password"
+              label={t('register.password')}
               type={showPassword ? 'text' : 'password'}
-              placeholder="Create a strong password"
+              placeholder={t('register.passwordPlaceholder')}
               leftIcon={<Lock />}
               error={errors.password1?.message}
               {...register('password1')}
@@ -190,7 +194,7 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
               type="button"
               onClick={togglePasswordVisibility}
               className="absolute right-3 top-8 text-gray-400 hover:text-gray-600 focus:outline-none"
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              aria-label={showPassword ? t('login.hidePassword') : t('login.showPassword')}
             >
               {showPassword ? (
                 <EyeOff className="h-5 w-5" />
@@ -202,9 +206,9 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
 
           <div className="relative">
             <InputField
-              label="Confirm Password"
+              label={t('register.confirmPassword')}
               type={showConfirmPassword ? 'text' : 'password'}
-              placeholder="Confirm your password"
+              placeholder={t('register.confirmPasswordPlaceholder')}
               leftIcon={<Lock />}
               error={errors.password2?.message}
               {...register('password2')}
@@ -213,7 +217,7 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
               type="button"
               onClick={toggleConfirmPasswordVisibility}
               className="absolute right-3 top-8 text-gray-400 hover:text-gray-600 focus:outline-none"
-              aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+              aria-label={showConfirmPassword ? t('login.hidePassword') : t('login.showPassword')}
             >
               {showConfirmPassword ? (
                 <EyeOff className="h-5 w-5" />
@@ -238,20 +242,20 @@ export function RegisterForm({ onSwitchToLogin }: RegisterFormProps) {
             isLoading={isLoading}
             disabled={isLoading}
           >
-            {isLoading ? 'Creating Account...' : 'Create Account'}
+            {isLoading ? t('register.signingUp') : t('register.signUp')}
           </Button>
         </form>
 
         {onSwitchToLogin && (
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              Already have an account?{' '}
+              {t('register.hasAccount')}{' '}
               <button
                 type="button"
                 onClick={onSwitchToLogin}
                 className="font-medium text-primary-600 hover:text-primary-500 focus:outline-none focus:underline"
               >
-                Sign in here
+                {t('register.signInHere')}
               </button>
             </p>
           </div>

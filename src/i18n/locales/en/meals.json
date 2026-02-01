@@ -1,0 +1,84 @@
+{
+  "voiceRecorder": {
+    "title": "Log Your Meal",
+    "subtitle": "Describe what you just ate and our AI will analyze the nutritional content",
+    "recording": "Recording...",
+    "processing": "Processing...",
+    "tapToRecord": "Tap to record",
+    "holdToRecord": "Hold to record",
+    "releaseToStop": "Recording... (release to stop)",
+    "tapToStop": "Recording... (click to stop or wait for silence)",
+    "recordingComplete": "Recording complete",
+    "maxDuration": "Max 5 minutes",
+    "success": "Meal logged successfully!",
+    "foodItemsDetected": "{{count}} food items detected",
+    "error": "Failed to process recording",
+    "analyzing": "Analyzing your meal...",
+    "retryAnalysis": "Retry Analysis",
+    "newRecording": "New Recording",
+    "undoMeal": "Undo meal ({{seconds}}s)",
+    "undoing": "Undoing...",
+    "instructions": {
+      "title": "Two ways to record:",
+      "pressHold": "Press & hold",
+      "pressHoldDesc": "Record while holding, release to stop",
+      "quickTap": "Quick tap",
+      "quickTapDesc": "Click to start, click again or pause for 3s to stop",
+      "example": "Example: \"I had two eggs with toast and orange juice for breakfast\""
+    }
+  },
+  "mealCard": {
+    "calories": "cal",
+    "itemsCount": "{{count}} items",
+    "itemsCount_one": "{{count}} item",
+    "protein": "Protein",
+    "carbs": "Carbs",
+    "fat": "Fat",
+    "noDescription": "No description",
+    "moreItems": "+{{count}} more",
+    "timeDetected": "Time detected"
+  },
+  "macros": {
+    "protein": "Protein",
+    "carbs": "Carbs",
+    "fat": "Fat"
+  },
+  "mealTypes": {
+    "breakfast": "Breakfast",
+    "lunch": "Lunch",
+    "dinner": "Dinner",
+    "snack": "Snack",
+    "unknown": "Meal"
+  },
+  "recentMeals": {
+    "title": "Recent Meals",
+    "noMeals": "No meals recorded yet",
+    "useVoiceRecorder": "Use the voice recorder above to log your first meal",
+    "viewAll": "View All"
+  },
+  "dayTimeline": {
+    "title": "Today's Timeline",
+    "noMeals": "No meals logged today",
+    "addFirst": "Record your first meal!",
+    "meal": "meal",
+    "meals": "meals",
+    "loading": "Loading timeline...",
+    "deleteMeal": "Delete meal",
+    "deleteConfirm": "Delete this meal?",
+    "deleteWarning": "This action cannot be undone.",
+    "deleting": "Deleting..."
+  },
+  "delete": {
+    "confirm": "Delete this meal?",
+    "warning": "This action cannot be undone.",
+    "success": "Meal deleted",
+    "error": "Failed to delete meal",
+    "deleting": "Deleting..."
+  },
+  "timePeriods": {
+    "night": "Night",
+    "morning": "Morning",
+    "afternoon": "Afternoon",
+    "evening": "Evening"
+  }
+}

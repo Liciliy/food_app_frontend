@@ -4,6 +4,7 @@
  */
 
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   LineChart,
   Line,
@@ -50,6 +51,8 @@ function CustomTooltip({ active, payload }: any) {
  * Shows daily calorie intake for the week with average reference line
  */
 export function WeeklyCalorieTrend({ stats, isLoading }: WeeklyCalorieTrendProps) {
+  const { t } = useTranslation('stats');
+  
   const chartData = useMemo(() => {
     if (!stats?.daily_breakdown) {
       // Return empty week with day labels
@@ -93,9 +96,9 @@ export function WeeklyCalorieTrend({ stats, isLoading }: WeeklyCalorieTrendProps
   if (isLoading) {
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Weekly Calorie Trend</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('charts.weeklyTrend')}</h3>
         <div className="h-64 flex items-center justify-center">
-          <div className="animate-pulse text-gray-400">Loading chart...</div>
+          <div className="animate-pulse text-gray-400">{t('charts.loadingChart')}</div>
         </div>
       </div>
     );
@@ -104,7 +107,7 @@ export function WeeklyCalorieTrend({ stats, isLoading }: WeeklyCalorieTrendProps
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">Weekly Calorie Trend</h3>
+        <h3 className="text-lg font-semibold text-gray-900">{t('charts.weeklyTrend')}</h3>
         {stats && (
           <span className="text-sm text-gray-500">
             {new Date(stats.week_start).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
@@ -117,19 +120,19 @@ export function WeeklyCalorieTrend({ stats, isLoading }: WeeklyCalorieTrendProps
       {/* Summary Stats */}
       <div className="grid grid-cols-3 gap-4 mb-6">
         <div className="text-center p-2 bg-gray-50 rounded-lg">
-          <p className="text-xs text-gray-500">Total</p>
+          <p className="text-xs text-gray-500">{t('charts.total')}</p>
           <p className="text-lg font-bold text-gray-900">
-            {stats ? Number(stats.total_calories).toLocaleString() : '0'} kcal
+            {stats ? Number(stats.total_calories).toLocaleString() : '0'} {t('summary.kcal')}
           </p>
         </div>
         <div className="text-center p-2 bg-primary-50 rounded-lg">
-          <p className="text-xs text-gray-500">Daily Avg</p>
+          <p className="text-xs text-gray-500">{t('charts.dailyAvg')}</p>
           <p className="text-lg font-bold text-primary-600">
-            {averageCalories.toLocaleString()} kcal
+            {averageCalories.toLocaleString()} {t('summary.kcal')}
           </p>
         </div>
         <div className="text-center p-2 bg-gray-50 rounded-lg">
-          <p className="text-xs text-gray-500">Meals</p>
+          <p className="text-xs text-gray-500">{t('summary.meals')}</p>
           <p className="text-lg font-bold text-gray-900">
             {stats?.meal_count || 0}
           </p>

@@ -4,6 +4,7 @@
  */
 
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   PieChart,
   Pie,
@@ -75,7 +76,10 @@ function CustomTooltip({ active, payload }: any) {
  * Macro distribution pie chart
  * Shows protein, carbs, and fat as a donut chart
  */
-export function MacroDistributionChart({ macros, isLoading, title = "Macro Distribution" }: MacroDistributionChartProps) {
+export function MacroDistributionChart({ macros, isLoading, title }: MacroDistributionChartProps) {
+  const { t } = useTranslation('stats');
+  const displayTitle = title || t('charts.macroDistribution');
+  
   const chartData = useMemo(() => {
     const protein = Number(macros?.protein) || 0;
     const carbs = Number(macros?.carbs) || 0;
@@ -87,11 +91,11 @@ export function MacroDistributionChart({ macros, isLoading, title = "Macro Distr
     const fatCals = fat * 9;
 
     return [
-      { name: 'Protein', value: protein, calories: proteinCals, color: MACRO_COLORS.protein },
-      { name: 'Carbs', value: carbs, calories: carbsCals, color: MACRO_COLORS.carbs },
-      { name: 'Fat', value: fat, calories: fatCals, color: MACRO_COLORS.fat },
+      { name: t('summary.protein'), value: protein, calories: proteinCals, color: MACRO_COLORS.protein },
+      { name: t('summary.carbs'), value: carbs, calories: carbsCals, color: MACRO_COLORS.carbs },
+      { name: t('summary.fat'), value: fat, calories: fatCals, color: MACRO_COLORS.fat },
     ];
-  }, [macros]);
+  }, [macros, t]);
 
   const totalGrams = useMemo(() => {
     return chartData.reduce((sum, item) => sum + item.value, 0);
@@ -104,9 +108,9 @@ export function MacroDistributionChart({ macros, isLoading, title = "Macro Distr
   if (isLoading) {
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{displayTitle}</h3>
         <div className="h-64 flex items-center justify-center">
-          <div className="animate-pulse text-gray-400">Loading chart...</div>
+          <div className="animate-pulse text-gray-400">{t('charts.loadingChart')}</div>
         </div>
       </div>
     );
@@ -116,11 +120,11 @@ export function MacroDistributionChart({ macros, isLoading, title = "Macro Distr
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">{title}</h3>
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">{displayTitle}</h3>
 
       {!hasData ? (
         <div className="h-48 flex items-center justify-center">
-          <p className="text-gray-400">No macro data available</p>
+          <p className="text-gray-400">{t('charts.noMacroData')}</p>
         </div>
       ) : (
         <>
@@ -176,8 +180,8 @@ export function MacroDistributionChart({ macros, isLoading, title = "Macro Distr
 
           {/* Total */}
           <div className="text-center mt-4 pt-3 border-t border-gray-100">
-            <p className="text-xs text-gray-500">Total from macros</p>
-            <p className="text-lg font-bold text-gray-900">{totalCalories.toFixed(0)} kcal</p>
+            <p className="text-xs text-gray-500">{t('charts.total')}</p>
+            <p className="text-lg font-bold text-gray-900">{totalCalories.toFixed(0)} {t('summary.kcal')}</p>
           </div>
         </>
       )}

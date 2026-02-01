@@ -1,0 +1,28 @@
+{
+  "title": "Food Tracker",
+  "statistics": "Statistics",
+  "stats": {
+    "todayCalories": "Today's Calories",
+    "todayMeals": "Today's Meals",
+    "weeklyAverage": "Weekly Average",
+    "monthlyTotal": "Monthly Total",
+    "mealsLogged": "{{count}} meals logged",
+    "mealsLogged_one": "{{count}} meal logged",
+    "perDay": "per day",
+    "totalMeals": "{{count}} total meals"
+  },
+  "charts": {
+    "dailyNutrition": "Daily Nutrition",
+    "macroDistribution": "Today's Macro Distribution",
+    "weeklyTrend": "Weekly Calorie Trend",
+    "calories": "Calories",
+    "protein": "Protein",
+    "carbs": "Carbs",
+    "fat": "Fat"
+  },
+  "timeline": {
+    "title": "Today's Timeline",
+    "noMeals": "No meals logged today",
+    "addFirst": "Record your first meal!"
+  }
+}

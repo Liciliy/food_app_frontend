@@ -3,9 +3,10 @@
  * Handles user authentication with email and password
  */
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useTranslation } from 'react-i18next';
 import { z } from 'zod';
 import { Mail, Lock, Eye, EyeOff, RefreshCw } from 'lucide-react';
 import { Button } from '../common/Button';
@@ -14,20 +15,18 @@ import { useAuthStore } from '../../stores/authStore';
 import type { LoginRequest } from '../../types';
 
 /**
- * Login form validation schema
+ * Login form validation schema factory
  */
-const loginSchema = z.object({
+const createLoginSchema = (t: (key: string, options?: Record<string, unknown>) => string) => z.object({
   email: z
     .string()
-    .min(1, 'Email is required')
-    .email('Please enter a valid email address'),
+    .min(1, t('validation.emailRequired'))
+    .email(t('validation.emailInvalid')),
   password: z
     .string()
-    .min(1, 'Password is required')
-    .min(6, 'Password must be at least 6 characters'),
+    .min(1, t('validation.passwordRequired'))
+    .min(6, t('validation.passwordMin', { min: 6 })),
 });
-
-type LoginFormData = z.infer<typeof loginSchema>;
 
 interface LoginFormProps {
   onSwitchToRegister?: () => void;
@@ -38,6 +37,7 @@ interface LoginFormProps {
  * Provides email/password authentication with validation
  */
 export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
+  const { t } = useTranslation('auth');
   const [showPassword, setShowPassword] = useState(false);
   const [showResendForm, setShowResendForm] = useState(false);
   const [resendEmail, setResendEmail] = useState('');
@@ -50,6 +50,10 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
     clearError, 
     clearSuccess 
   } = useAuthStore();
+
+  // Create schema with translations - memoized to avoid re-creating on every render
+  const loginSchema = useMemo(() => createLoginSchema(t), [t]);
+  type LoginFormData = z.infer<typeof loginSchema>;
 
   const {
     register,
@@ -111,10 +115,10 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
       <div className="card">
         <div className="text-center mb-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Welcome Back
+            {t('login.title')}
           </h1>
           <p className="text-gray-600">
-            Sign in to continue tracking your meals
+            {t('login.subtitle')}
           </p>
         </div>
 
@@ -134,7 +138,7 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
                 className="mt-2 text-sm font-medium text-primary-600 hover:text-primary-500 flex items-center"
               >
                 <RefreshCw className="w-4 h-4 mr-1" />
-                Resend verification email
+                {t('verification.resend')}
               </button>
             )}
           </div>
@@ -144,7 +148,7 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
         {showResendForm && (
           <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-sm text-blue-800 mb-3">
-              Enter your email to receive a new verification link:
+              {t('verification.resendPrompt')}
             </p>
             <div className="flex gap-2">
               <input
@@ -176,9 +180,9 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <InputField
-            label="Email Address"
+            label={t('login.email')}
             type="email"
-            placeholder="Enter your email"
+            placeholder={t('login.emailPlaceholder')}
             leftIcon={<Mail />}
             error={errors.email?.message}
             {...register('email')}
@@ -186,9 +190,9 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
 
           <div className="relative">
             <InputField
-              label="Password"
+              label={t('login.password')}
               type={showPassword ? 'text' : 'password'}
-              placeholder="Enter your password"
+              placeholder={t('login.passwordPlaceholder')}
               leftIcon={<Lock />}
               error={errors.password?.message}
               {...register('password')}
@@ -197,7 +201,7 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
               type="button"
               onClick={togglePasswordVisibility}
               className="absolute right-3 top-8 text-gray-400 hover:text-gray-600 focus:outline-none"
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              aria-label={showPassword ? t('login.hidePassword') : t('login.showPassword')}
             >
               {showPassword ? (
                 <EyeOff className="h-5 w-5" />
@@ -213,20 +217,20 @@ export function LoginForm({ onSwitchToRegister }: LoginFormProps) {
             isLoading={isLoading}
             disabled={isLoading}
           >
-            {isLoading ? 'Signing In...' : 'Sign In'}
+            {isLoading ? t('login.signingIn') : t('login.signIn')}
           </Button>
         </form>
 
         {onSwitchToRegister && (
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              Don't have an account?{' '}
+              {t('login.noAccount')}{' '}
               <button
                 type="button"
                 onClick={onSwitchToRegister}
                 className="font-medium text-primary-600 hover:text-primary-500 focus:outline-none focus:underline"
               >
-                Sign up here
+                {t('login.signUpHere')}
               </button>
             </p>
           </div>

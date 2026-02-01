@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -55,6 +56,7 @@ function getMonthString(date: Date): string {
  * Statistics page component
  */
 export function StatisticsPage() {
+  const { t } = useTranslation('stats');
   const {
     dailyStats,
     weeklyStats,
@@ -174,7 +176,7 @@ export function StatisticsPage() {
             <div className="flex items-center space-x-2">
               <BarChart3 className="w-6 h-6 text-primary-600" />
               <h1 className="text-xl font-semibold text-gray-900">
-                Statistics & Insights
+                {t('title')}
               </h1>
             </div>
             
@@ -183,7 +185,7 @@ export function StatisticsPage() {
               size="sm"
               onClick={() => window.history.back()}
             >
-              Back to Dashboard
+              {t('backToDashboard')}
             </Button>
           </div>
         </div>
@@ -205,7 +207,7 @@ export function StatisticsPage() {
                       : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  {p === 'day' ? 'Daily' : p === 'week' ? 'Weekly' : 'Monthly'}
+                  {t(`period.${p === 'day' ? 'daily' : p === 'week' ? 'weekly' : 'monthly'}`)}
                 </button>
               ))}
             </div>
@@ -238,7 +240,7 @@ export function StatisticsPage() {
                 onClick={goToToday}
                 className="ml-2"
               >
-                Today
+                {t('period.today')}
               </Button>
             </div>
           </div>
@@ -254,38 +256,38 @@ export function StatisticsPage() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
               <SummaryCard
                 icon={<Flame className="w-5 h-5" />}
-                label="Total Calories"
+                label={t('summary.totalCalories')}
                 value={summaryStats?.totalCalories?.toLocaleString() || '0'}
-                unit="kcal"
+                unit={t('summary.kcal')}
                 color="red"
               />
               <SummaryCard
                 icon={<Utensils className="w-5 h-5" />}
-                label="Meals Logged"
+                label={t('summary.mealsLogged')}
                 value={summaryStats?.mealCount?.toString() || '0'}
-                unit="meals"
+                unit={t('summary.meals')}
                 color="blue"
               />
               <SummaryCard
                 icon={<Target className="w-5 h-5" />}
-                label={period === 'day' ? 'Cal/Meal' : 'Daily Average'}
+                label={period === 'day' ? t('summary.calPerMeal') : t('summary.dailyAverage')}
                 value={
                   period === 'day'
                     ? Math.round(summaryStats?.avgCaloriesPerMeal || 0).toLocaleString()
                     : Math.round(summaryStats?.avgCaloriesPerDay || summaryStats?.avgCaloriesPerMeal || 0).toLocaleString()
                 }
-                unit="kcal"
+                unit={t('summary.kcal')}
                 color="green"
               />
               <SummaryCard
                 icon={<CalendarDays className="w-5 h-5" />}
-                label={period === 'month' ? 'Days in Month' : 'Tracking'}
+                label={period === 'month' ? t('summary.daysInMonth') : t('summary.tracking')}
                 value={
                   period === 'month' 
                     ? summaryStats?.daysInMonth?.toString() || '30'
                     : period === 'week' ? '7' : '1'
                 }
-                unit="days"
+                unit={t('summary.days')}
                 color="purple"
               />
             </div>
@@ -394,6 +396,8 @@ interface InsightsPanelProps {
 }
 
 function InsightsPanel({ period, dailyStats, weeklyStats, monthlyStats }: InsightsPanelProps) {
+  const { t } = useTranslation('stats');
+  
   const insights = useMemo(() => {
     const items: { type: 'positive' | 'negative' | 'neutral'; text: string }[] = [];
 
@@ -403,21 +407,21 @@ function InsightsPanel({ period, dailyStats, weeklyStats, monthlyStats }: Insigh
       const mealCount = dailyStats.meal_count || 0;
 
       if (calories < 1500) {
-        items.push({ type: 'negative', text: 'Low calorie intake today. Make sure to eat enough!' });
+        items.push({ type: 'negative', text: t('insights.lowCalories') });
       } else if (calories > 2500) {
-        items.push({ type: 'neutral', text: 'Higher calorie day. Consider lighter meals tomorrow.' });
+        items.push({ type: 'neutral', text: t('insights.highCalories') });
       } else {
-        items.push({ type: 'positive', text: 'Good calorie balance today!' });
+        items.push({ type: 'positive', text: t('insights.goodBalance') });
       }
 
       if (protein < 40) {
-        items.push({ type: 'negative', text: 'Consider adding more protein to your meals.' });
+        items.push({ type: 'negative', text: t('insights.lowProtein') });
       } else if (protein >= 50) {
-        items.push({ type: 'positive', text: 'Great protein intake!' });
+        items.push({ type: 'positive', text: t('insights.goodProtein') });
       }
 
       if (mealCount < 3) {
-        items.push({ type: 'neutral', text: `Only ${mealCount} meal(s) logged. Try not to skip meals.` });
+        items.push({ type: 'neutral', text: t('insights.fewMeals', { count: mealCount }) });
       }
     }
 
@@ -426,13 +430,13 @@ function InsightsPanel({ period, dailyStats, weeklyStats, monthlyStats }: Insigh
       const mealCount = weeklyStats.meal_count || 0;
 
       if (avgCalories >= 1800 && avgCalories <= 2200) {
-        items.push({ type: 'positive', text: 'Consistent calorie intake this week!' });
+        items.push({ type: 'positive', text: t('insights.consistentWeek') });
       }
 
       if (mealCount >= 18) {
-        items.push({ type: 'positive', text: 'Great job logging meals consistently!' });
+        items.push({ type: 'positive', text: t('insights.greatLogging') });
       } else if (mealCount < 14) {
-        items.push({ type: 'neutral', text: 'Try to log more meals for better tracking.' });
+        items.push({ type: 'neutral', text: t('insights.logMore') });
       }
     }
 
@@ -440,22 +444,22 @@ function InsightsPanel({ period, dailyStats, weeklyStats, monthlyStats }: Insigh
       const avgCalories = Number(monthlyStats.average_daily_calories) || 0;
       
       if (avgCalories >= 1800 && avgCalories <= 2200) {
-        items.push({ type: 'positive', text: 'Steady calorie average this month!' });
+        items.push({ type: 'positive', text: t('insights.steadyMonth') });
       }
     }
 
     if (items.length === 0) {
-      items.push({ type: 'neutral', text: 'Keep logging your meals for more insights!' });
+      items.push({ type: 'neutral', text: t('insights.keepLogging') });
     }
 
     return items;
-  }, [period, dailyStats, weeklyStats, monthlyStats]);
+  }, [period, dailyStats, weeklyStats, monthlyStats, t]);
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mt-6">
       <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
         <TrendingUp className="w-5 h-5 mr-2 text-primary-600" />
-        Insights & Recommendations
+        {t('insights.title')}
       </h3>
       <div className="space-y-3">
         {insights.map((insight, index) => (

@@ -5,6 +5,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { CheckCircle, XCircle, Loader2, Mail } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
 import { Button } from '../components/common/Button';
@@ -14,6 +15,7 @@ import { Button } from '../components/common/Button';
  * Extracts key from URL and calls verification API
  */
 export function VerifyEmailPage() {
+  const { t } = useTranslation('auth');
   const { key } = useParams<{ key: string }>();
   const navigate = useNavigate();
   const { verifyEmail, isLoading, error, successMessage, clearError, clearSuccess } = useAuthStore();
@@ -52,13 +54,13 @@ export function VerifyEmailPage() {
               <Mail className="w-8 h-8 text-yellow-600" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Invalid Verification Link
+              {t('verification.invalidLink')}
             </h1>
             <p className="text-gray-600 mb-6">
-              The verification link is invalid or missing. Please check your email for the correct link.
+              {t('verification.invalidLinkMessage')}
             </p>
             <Link to="/auth">
-              <Button className="w-full">Go to Login</Button>
+              <Button className="w-full">{t('verification.goToLogin')}</Button>
             </Link>
           </div>
         </div>
@@ -74,10 +76,10 @@ export function VerifyEmailPage() {
           <div className="card text-center">
             <Loader2 className="w-16 h-16 text-primary-600 animate-spin mx-auto mb-4" />
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Verifying Your Email
+              {t('verification.verifyingTitle')}
             </h1>
             <p className="text-gray-600">
-              Please wait while we verify your email address...
+              {t('verification.verifyingMessage')}
             </p>
           </div>
         </div>
@@ -95,13 +97,13 @@ export function VerifyEmailPage() {
               <CheckCircle className="w-8 h-8 text-green-600" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Email Verified!
+              {t('verification.success')}
             </h1>
             <p className="text-gray-600 mb-6">
               {successMessage}
             </p>
             <Button onClick={handleGoToLogin} className="w-full">
-              Continue to Login
+              {t('verification.continueToLogin')}
             </Button>
           </div>
         </div>
@@ -119,19 +121,19 @@ export function VerifyEmailPage() {
               <XCircle className="w-8 h-8 text-red-600" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Verification Failed
+              {t('verification.error')}
             </h1>
             <p className="text-gray-600 mb-6">
               {error}
             </p>
             <div className="space-y-3">
               <Link to="/auth">
-                <Button className="w-full">Go to Login</Button>
+                <Button className="w-full">{t('verification.goToLogin')}</Button>
               </Link>
               <p className="text-sm text-gray-500">
-                Need a new verification link?{' '}
+                {t('verification.needNewLink')}{' '}
                 <Link to="/auth" className="text-primary-600 hover:text-primary-500">
-                  Sign in and request a new one
+                  {t('verification.signInAndRequest')}
                 </Link>
               </p>
             </div>

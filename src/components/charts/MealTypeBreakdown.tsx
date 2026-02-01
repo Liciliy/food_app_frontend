@@ -4,6 +4,7 @@
  */
 
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   BarChart,
   Bar,
@@ -25,11 +26,11 @@ interface MealTypeBreakdownProps {
  * Meal type colors and icons
  */
 const MEAL_TYPE_CONFIG = {
-  breakfast: { color: '#f59e0b', icon: '🌅', label: 'Breakfast' },
-  lunch: { color: '#f97316', icon: '☀️', label: 'Lunch' },
-  dinner: { color: '#8b5cf6', icon: '🌙', label: 'Dinner' },
-  snack: { color: '#22c55e', icon: '🍎', label: 'Snack' },
-  unknown: { color: '#6b7280', icon: '🍽️', label: 'Other' },
+  breakfast: { color: '#f59e0b', icon: '🌅', labelKey: 'meals:mealTypes.breakfast' },
+  lunch: { color: '#f97316', icon: '☀️', labelKey: 'meals:mealTypes.lunch' },
+  dinner: { color: '#8b5cf6', icon: '🌙', labelKey: 'meals:mealTypes.dinner' },
+  snack: { color: '#22c55e', icon: '🍎', labelKey: 'meals:mealTypes.snack' },
+  unknown: { color: '#6b7280', icon: '🍽️', labelKey: 'meals:mealTypes.unknown' },
 };
 
 /**
@@ -59,11 +60,14 @@ function CustomTooltip({ active, payload }: any) {
  * Meal type breakdown chart
  */
 export function MealTypeBreakdown({ dailyStats, isLoading }: MealTypeBreakdownProps) {
+  const { t } = useTranslation('stats');
+  
   const chartData = useMemo(() => {
     if (!dailyStats?.meal_breakdown) {
       return Object.entries(MEAL_TYPE_CONFIG).map(([type, config]) => ({
         type,
         ...config,
+        label: t(config.labelKey),
         calories: 0,
         count: 0,
       }));
@@ -74,11 +78,12 @@ export function MealTypeBreakdown({ dailyStats, isLoading }: MealTypeBreakdownPr
       return {
         type,
         ...config,
+        label: t(config.labelKey),
         calories: Number(breakdown?.calories) || 0,
         count: breakdown?.count || 0,
       };
     }).filter(item => item.calories > 0 || item.count > 0);
-  }, [dailyStats]);
+  }, [dailyStats, t]);
 
   const totalCalories = useMemo(() => {
     return chartData.reduce((sum, item) => sum + item.calories, 0);
@@ -87,9 +92,9 @@ export function MealTypeBreakdown({ dailyStats, isLoading }: MealTypeBreakdownPr
   if (isLoading) {
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Meal Type Breakdown</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('charts.mealTypeBreakdown')}</h3>
         <div className="h-48 flex items-center justify-center">
-          <div className="animate-pulse text-gray-400">Loading...</div>
+          <div className="animate-pulse text-gray-400">{t('charts.loading')}</div>
         </div>
       </div>
     );
@@ -99,11 +104,11 @@ export function MealTypeBreakdown({ dailyStats, isLoading }: MealTypeBreakdownPr
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Meal Type Breakdown</h3>
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('charts.mealTypeBreakdown')}</h3>
       
       {!hasData ? (
         <div className="h-48 flex items-center justify-center text-gray-400">
-          No meal data available
+          {t('charts.noData')}
         </div>
       ) : (
         <>

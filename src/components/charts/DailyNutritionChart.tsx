@@ -4,6 +4,7 @@
  */
 
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   BarChart,
   Bar,
@@ -68,13 +69,22 @@ function CustomTooltip({ active, payload }: any) {
  * Shows calories, protein, carbs, and fat with progress toward daily targets
  */
 export function DailyNutritionChart({ stats, isLoading }: DailyNutritionChartProps) {
+  const { t } = useTranslation('stats');
+  
   const chartData = useMemo(() => {
+    const labels = {
+      calories: t('summary.totalCalories'),
+      protein: t('summary.protein'),
+      carbs: t('summary.carbs'),
+      fat: t('summary.fat'),
+    };
+    
     if (!stats) {
       return [
-        { name: 'Calories', value: 0, target: DAILY_TARGETS.calories, unit: 'kcal', color: NUTRITION_COLORS.calories },
-        { name: 'Protein', value: 0, target: DAILY_TARGETS.protein, unit: 'g', color: NUTRITION_COLORS.protein },
-        { name: 'Carbs', value: 0, target: DAILY_TARGETS.carbs, unit: 'g', color: NUTRITION_COLORS.carbs },
-        { name: 'Fat', value: 0, target: DAILY_TARGETS.fat, unit: 'g', color: NUTRITION_COLORS.fat },
+        { name: labels.calories, value: 0, target: DAILY_TARGETS.calories, unit: t('summary.kcal'), color: NUTRITION_COLORS.calories },
+        { name: labels.protein, value: 0, target: DAILY_TARGETS.protein, unit: 'g', color: NUTRITION_COLORS.protein },
+        { name: labels.carbs, value: 0, target: DAILY_TARGETS.carbs, unit: 'g', color: NUTRITION_COLORS.carbs },
+        { name: labels.fat, value: 0, target: DAILY_TARGETS.fat, unit: 'g', color: NUTRITION_COLORS.fat },
       ];
     }
 
@@ -85,12 +95,12 @@ export function DailyNutritionChart({ stats, isLoading }: DailyNutritionChartPro
     const fat = Number(stats.macros?.fat) || 0;
 
     return [
-      { name: 'Calories', value: calories, target: DAILY_TARGETS.calories, unit: 'kcal', color: NUTRITION_COLORS.calories },
-      { name: 'Protein', value: protein, target: DAILY_TARGETS.protein, unit: 'g', color: NUTRITION_COLORS.protein },
-      { name: 'Carbs', value: carbs, target: DAILY_TARGETS.carbs, unit: 'g', color: NUTRITION_COLORS.carbs },
-      { name: 'Fat', value: fat, target: DAILY_TARGETS.fat, unit: 'g', color: NUTRITION_COLORS.fat },
+      { name: labels.calories, value: calories, target: DAILY_TARGETS.calories, unit: t('summary.kcal'), color: NUTRITION_COLORS.calories },
+      { name: labels.protein, value: protein, target: DAILY_TARGETS.protein, unit: 'g', color: NUTRITION_COLORS.protein },
+      { name: labels.carbs, value: carbs, target: DAILY_TARGETS.carbs, unit: 'g', color: NUTRITION_COLORS.carbs },
+      { name: labels.fat, value: fat, target: DAILY_TARGETS.fat, unit: 'g', color: NUTRITION_COLORS.fat },
     ];
-  }, [stats]);
+  }, [stats, t]);
 
   // Calculate percentages for display
   const percentageData = useMemo(() => {
@@ -103,9 +113,9 @@ export function DailyNutritionChart({ stats, isLoading }: DailyNutritionChartPro
   if (isLoading) {
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Today's Nutrition</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('charts.todaysNutrition')}</h3>
         <div className="h-64 flex items-center justify-center">
-          <div className="animate-pulse text-gray-400">Loading chart...</div>
+          <div className="animate-pulse text-gray-400">{t('charts.loadingChart')}</div>
         </div>
       </div>
     );
@@ -114,13 +124,13 @@ export function DailyNutritionChart({ stats, isLoading }: DailyNutritionChartPro
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">Today's Nutrition</h3>
+        <h3 className="text-lg font-semibold text-gray-900">{t('charts.todaysNutrition')}</h3>
         <span className="text-sm text-gray-500">
           {stats?.date ? new Date(stats.date).toLocaleDateString('en-US', { 
             weekday: 'short', 
             month: 'short', 
             day: 'numeric' 
-          }) : 'Today'}
+          }) : t('period.today')}
         </span>
       </div>
 

@@ -1,0 +1,81 @@
+{
+  "title": "Statistics & Insights",
+  "backToDashboard": "Back to Dashboard",
+  "period": {
+    "day": "Day",
+    "week": "Week",
+    "month": "Month",
+    "daily": "Daily",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "today": "Today"
+  },
+  "summary": {
+    "totalCalories": "Total Calories",
+    "mealsLogged": "Meals Logged",
+    "mealCount": "Meal Count",
+    "calPerMeal": "Cal/Meal",
+    "dailyAverage": "Daily Average",
+    "avgPerMeal": "Avg per Meal",
+    "avgPerDay": "Avg per Day",
+    "daysInMonth": "Days in Month",
+    "tracking": "Tracking",
+    "days": "days",
+    "meals": "meals",
+    "kcal": "kcal",
+    "protein": "Protein",
+    "carbs": "Carbs",
+    "fat": "Fat"
+  },
+  "charts": {
+    "todaysNutrition": "Today's Nutrition",
+    "dailyNutrition": "Daily Nutrition",
+    "weeklyTrend": "Weekly Calorie Trend",
+    "monthlyOverview": "Monthly Overview",
+    "monthlyProgress": "Monthly Progress",
+    "macroDistribution": "Macro Distribution",
+    "todaysMacros": "Today's Macros",
+    "mealPattern": "Meal Patterns",
+    "mealsPerDay": "Meals per Day",
+    "mealTypeBreakdown": "Meal Type Breakdown",
+    "weekdayComparison": "Weekday Comparison",
+    "calorieGoal": "Calorie Goal Progress",
+    "noData": "No data available",
+    "noMacroData": "No macro data available",
+    "loading": "Loading...",
+    "loadingChart": "Loading chart...",
+    "total": "Total",
+    "dailyAvg": "Daily Avg",
+    "goal": "Goal",
+    "ofGoal": "of goal",
+    "totalConsumed": "Total Consumed",
+    "dailyVariance": "Daily variance from goal"
+  },
+  "history": {
+    "title": "Meal History",
+    "mealsOn": "Meals on {{date}}",
+    "noMeals": "No meals in this period",
+    "loadMore": "Load More"
+  },
+  "insights": {
+    "title": "Insights & Recommendations",
+    "lowCalories": "Low calorie intake today. Make sure to eat enough!",
+    "highCalories": "Higher calorie day. Consider lighter meals tomorrow.",
+    "goodBalance": "Good calorie balance today!",
+    "lowProtein": "Consider adding more protein to your meals.",
+    "goodProtein": "Great protein intake!",
+    "fewMeals": "Only {{count}} meal(s) logged. Try not to skip meals.",
+    "consistentWeek": "Consistent calorie intake this week!",
+    "greatLogging": "Great job logging meals consistently!",
+    "logMore": "Try to log more meals for better tracking.",
+    "steadyMonth": "Steady calorie average this month!",
+    "keepLogging": "Keep logging your meals for more insights!"
+  },
+  "goals": {
+    "title": "Goals",
+    "calorieTarget": "Calorie Target",
+    "progress": "{{current}} / {{target}} kcal",
+    "remaining": "{{count}} kcal remaining",
+    "exceeded": "{{count}} kcal over target"
+  }
+}

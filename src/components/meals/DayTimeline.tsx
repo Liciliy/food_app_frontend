@@ -5,10 +5,11 @@
  */
 
 import { useMemo, useState, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Clock, Coffee, Sunrise, Sun, Sunset, Moon, X, Trash2, Loader2, Utensils, Flame } from 'lucide-react';
 import type { Meal } from '../../types';
 import { useMealStore } from '../../stores/mealStore';
-import { formatTime, formatCalories, formatMacros, capitalize } from '../../utils';
+import { formatTime, formatCalories, formatMacros } from '../../utils';
 import { cn } from '../../utils';
 
 /** Delete window in seconds (3 hours) */
@@ -20,7 +21,7 @@ interface DayTimelineProps {
 }
 
 interface TimelinePeriod {
-  name: string;
+  nameKey: string;
   start: number;
   end: number;
   icon: typeof Sun;
@@ -31,7 +32,7 @@ interface TimelinePeriod {
 // Softer color scheme for time periods
 const TIME_PERIODS: TimelinePeriod[] = [
   {
-    name: 'Night',
+    nameKey: 'timePeriods.night',
     start: 0,
     end: 6,
     icon: Moon,
@@ -39,7 +40,7 @@ const TIME_PERIODS: TimelinePeriod[] = [
     textColor: 'text-slate-500',
   },
   {
-    name: 'Morning',
+    nameKey: 'timePeriods.morning',
     start: 6,
     end: 12,
     icon: Sunrise,
@@ -47,7 +48,7 @@ const TIME_PERIODS: TimelinePeriod[] = [
     textColor: 'text-amber-700',
   },
   {
-    name: 'Afternoon',
+    nameKey: 'timePeriods.afternoon',
     start: 12,
     end: 18,
     icon: Sun,
@@ -55,7 +56,7 @@ const TIME_PERIODS: TimelinePeriod[] = [
     textColor: 'text-sky-700',
   },
   {
-    name: 'Evening',
+    nameKey: 'timePeriods.evening',
     start: 18,
     end: 21,
     icon: Sunset,
@@ -63,7 +64,7 @@ const TIME_PERIODS: TimelinePeriod[] = [
     textColor: 'text-orange-700',
   },
   {
-    name: 'Night',
+    nameKey: 'timePeriods.night',
     start: 21,
     end: 24,
     icon: Moon,
@@ -77,20 +78,6 @@ const TIME_PERIODS: TimelinePeriod[] = [
  */
 function getTimePeriod(hour: number): TimelinePeriod {
   return TIME_PERIODS.find(period => hour >= period.start && hour < period.end) || TIME_PERIODS[0];
-}
-
-/**
- * Get meal type display name
- */
-function getMealTypeName(mealType: string): string {
-  const names: Record<string, string> = {
-    breakfast: 'Breakfast',
-    lunch: 'Lunch',
-    dinner: 'Dinner',
-    snack: 'Snack',
-    unknown: 'Meal',
-  };
-  return names[mealType] || 'Meal';
 }
 
 /**
@@ -110,18 +97,18 @@ function getMealTypeColor(mealType: string): string {
 /**
  * Get meal type style for badge
  */
-function getMealTypeStyle(mealType: string): { bgColor: string; textColor: string; icon: string } {
+function getMealTypeStyle(mealType: string): { bgColor: string; textColor: string; icon: string; translationKey: string } {
   switch (mealType) {
     case 'breakfast':
-      return { bgColor: 'bg-yellow-100', textColor: 'text-yellow-700', icon: '🌅' };
+      return { bgColor: 'bg-yellow-100', textColor: 'text-yellow-700', icon: '🌅', translationKey: 'mealTypes.breakfast' };
     case 'lunch':
-      return { bgColor: 'bg-orange-100', textColor: 'text-orange-700', icon: '☀️' };
+      return { bgColor: 'bg-orange-100', textColor: 'text-orange-700', icon: '☀️', translationKey: 'mealTypes.lunch' };
     case 'dinner':
-      return { bgColor: 'bg-purple-100', textColor: 'text-purple-700', icon: '🌙' };
+      return { bgColor: 'bg-purple-100', textColor: 'text-purple-700', icon: '🌙', translationKey: 'mealTypes.dinner' };
     case 'snack':
-      return { bgColor: 'bg-green-100', textColor: 'text-green-700', icon: '🍎' };
+      return { bgColor: 'bg-green-100', textColor: 'text-green-700', icon: '🍎', translationKey: 'mealTypes.snack' };
     default:
-      return { bgColor: 'bg-gray-100', textColor: 'text-gray-700', icon: '🍽️' };
+      return { bgColor: 'bg-gray-100', textColor: 'text-gray-700', icon: '🍽️', translationKey: 'mealTypes.unknown' };
   }
 }
 
@@ -146,6 +133,7 @@ interface MealPosition {
 }
 
 export function DayTimeline({ meals, isLoading }: DayTimelineProps) {
+  const { t } = useTranslation('meals');
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
   const [hoveredMealId, setHoveredMealId] = useState<number | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -288,10 +276,10 @@ export function DayTimeline({ meals, isLoading }: DayTimelineProps) {
       <div className="bg-white rounded-lg shadow-sm p-4">
         <div className="flex items-center space-x-2 mb-4">
           <Clock className="w-5 h-5 text-gray-400" />
-          <h2 className="text-lg font-semibold text-gray-900">Today's Timeline</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t('dayTimeline.title')}</h2>
         </div>
         <div className="flex items-center justify-center h-96">
-          <div className="text-gray-400">Loading timeline...</div>
+          <div className="text-gray-400">{t('dayTimeline.loading')}</div>
         </div>
       </div>
     );
@@ -301,9 +289,9 @@ export function DayTimeline({ meals, isLoading }: DayTimelineProps) {
     <div className="bg-white rounded-lg shadow-sm p-4">
       <div className="flex items-center space-x-2 mb-4">
         <Clock className="w-5 h-5 text-indigo-600" />
-        <h2 className="text-lg font-semibold text-gray-900">Today's Timeline</h2>
+        <h2 className="text-lg font-semibold text-gray-900">{t('dayTimeline.title')}</h2>
         <span className="text-sm text-gray-500 ml-auto">
-          {meals.length} {meals.length === 1 ? 'meal' : 'meals'}
+          {meals.length} {meals.length === 1 ? t('dayTimeline.meal') : t('dayTimeline.meals')}
         </span>
       </div>
 
@@ -387,7 +375,7 @@ export function DayTimeline({ meals, isLoading }: DayTimelineProps) {
                       <div className="flex items-center gap-1 flex-shrink-0">
                         <span className={`w-1.5 h-1.5 rounded-full ${getMealTypeColor(mealPos.meal.meal_type)}`} />
                         <span className="font-semibold text-gray-800">
-                          {getMealTypeName(mealPos.meal.meal_type)}
+                          {t(getMealTypeStyle(mealPos.meal.meal_type).translationKey)}
                         </span>
                       </div>
                       
@@ -396,7 +384,7 @@ export function DayTimeline({ meals, isLoading }: DayTimelineProps) {
                           {typeof mealPos.meal.total_calories === 'string'
                             ? parseFloat(mealPos.meal.total_calories).toFixed(0)
                             : mealPos.meal.total_calories.toFixed(0)}
-                          <span className="font-normal text-gray-400 ml-0.5">cal</span>
+                          <span className="font-normal text-gray-400 ml-0.5">{t('common:calories_short')}</span>
                         </span>
                       )}
                       
@@ -473,7 +461,7 @@ export function DayTimeline({ meals, isLoading }: DayTimelineProps) {
                             mealStyle.bgColor,
                             mealStyle.textColor
                           )}>
-                            {mealStyle.icon} {capitalize(meal.meal_type || 'unknown')}
+                            {mealStyle.icon} {t(mealStyle.translationKey)}
                           </span>
                           <div className="flex items-center text-xs text-gray-500">
                             <Clock className="w-3 h-3 mr-1" />
@@ -487,7 +475,7 @@ export function DayTimeline({ meals, isLoading }: DayTimelineProps) {
                             <button 
                               onClick={handleDeleteClick}
                               className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
-                              title="Delete meal"
+                              title={t('dayTimeline.deleteMeal')}
                             >
                               <Trash2 className="w-4 h-4" />
                             </button>
@@ -508,7 +496,7 @@ export function DayTimeline({ meals, isLoading }: DayTimelineProps) {
                       {/* Delete confirmation */}
                       {showDeleteConfirm && (
                         <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded-lg">
-                          <p className="text-xs text-red-700 mb-2">Delete this meal? This cannot be undone.</p>
+                          <p className="text-xs text-red-700 mb-2">{t('dayTimeline.deleteConfirm')} {t('dayTimeline.deleteWarning')}</p>
                           <div className="flex gap-2">
                             <button
                               onClick={handleConfirmDelete}
@@ -518,10 +506,10 @@ export function DayTimeline({ meals, isLoading }: DayTimelineProps) {
                               {isDeleting ? (
                                 <>
                                   <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                                  Deleting...
+                                  {t('dayTimeline.deleting')}
                                 </>
                               ) : (
-                                'Delete'
+                                t('common:delete')
                               )}
                             </button>
                             <button
@@ -529,7 +517,7 @@ export function DayTimeline({ meals, isLoading }: DayTimelineProps) {
                               disabled={isDeleting}
                               className="flex-1 px-2 py-1 bg-gray-200 hover:bg-gray-300 text-gray-700 text-xs rounded disabled:opacity-50"
                             >
-                              Cancel
+                              {t('common:cancel')}
                             </button>
                           </div>
                         </div>
@@ -538,7 +526,7 @@ export function DayTimeline({ meals, isLoading }: DayTimelineProps) {
                       {/* Calories */}
                       <div className="flex items-center text-primary-600 font-semibold mb-3">
                         <Flame className="w-4 h-4 mr-1" />
-                        {formatCalories(meal.total_calories)} cal
+                        {formatCalories(meal.total_calories)} {t('common:calories_short')}
                       </div>
 
                       {/* Description */}
@@ -553,7 +541,7 @@ export function DayTimeline({ meals, isLoading }: DayTimelineProps) {
                         <div className="space-y-2 mb-3">
                           <div className="flex items-center text-xs text-gray-500 mb-1">
                             <Utensils className="w-3 h-3 mr-1" />
-                            {meal.food_items.length} items
+                            {t('mealCard.itemsCount', { count: meal.food_items.length })}
                           </div>
                           <div className="flex flex-wrap gap-1">
                             {meal.food_items.slice(0, 5).map((item) => (
@@ -569,7 +557,7 @@ export function DayTimeline({ meals, isLoading }: DayTimelineProps) {
                             ))}
                             {meal.food_items.length > 5 && (
                               <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-500 text-xs rounded-full">
-                                +{meal.food_items.length - 5} more
+                                {t('mealCard.moreItems', { count: meal.food_items.length - 5 })}
                               </span>
                             )}
                           </div>
@@ -581,7 +569,7 @@ export function DayTimeline({ meals, isLoading }: DayTimelineProps) {
                         <div className="flex items-center space-x-4 pt-2 border-t border-gray-100">
                           <div className="flex-1">
                             <div className="flex items-center justify-between text-xs">
-                              <span className="text-gray-500">Protein</span>
+                              <span className="text-gray-500">{t('macros.protein')}</span>
                               <span className="font-medium text-blue-600">
                                 {formatMacros(meal.macros.protein ?? 0)}
                               </span>
@@ -596,7 +584,7 @@ export function DayTimeline({ meals, isLoading }: DayTimelineProps) {
                           
                           <div className="flex-1">
                             <div className="flex items-center justify-between text-xs">
-                              <span className="text-gray-500">Carbs</span>
+                              <span className="text-gray-500">{t('macros.carbs')}</span>
                               <span className="font-medium text-yellow-600">
                                 {formatMacros(meal.macros.carbs ?? 0)}
                               </span>
@@ -611,7 +599,7 @@ export function DayTimeline({ meals, isLoading }: DayTimelineProps) {
                           
                           <div className="flex-1">
                             <div className="flex items-center justify-between text-xs">
-                              <span className="text-gray-500">Fat</span>
+                              <span className="text-gray-500">{t('macros.fat')}</span>
                               <span className="font-medium text-red-600">
                                 {formatMacros(meal.macros.fat ?? 0)}
                               </span>
@@ -676,7 +664,7 @@ export function DayTimeline({ meals, isLoading }: DayTimelineProps) {
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="text-center text-gray-400">
               <Coffee className="w-10 h-10 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">No meals logged today</p>
+              <p className="text-sm">{t('dayTimeline.noMeals')}</p>
             </div>
           </div>
         )}

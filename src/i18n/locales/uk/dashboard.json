@@ -1,0 +1,29 @@
+{
+  "title": "Трекер Їжі",
+  "statistics": "Статистика",
+  "stats": {
+    "todayCalories": "Калорії сьогодні",
+    "todayMeals": "Страви сьогодні",
+    "weeklyAverage": "Середнє за тиждень",
+    "monthlyTotal": "Всього за місяць",
+    "mealsLogged": "{{count}} страв записано",
+    "mealsLogged_one": "{{count}} страва записана",
+    "mealsLogged_few": "{{count}} страви записано",
+    "perDay": "на день",
+    "totalMeals": "{{count}} страв всього"
+  },
+  "charts": {
+    "dailyNutrition": "Денне харчування",
+    "macroDistribution": "Розподіл макронутрієнтів",
+    "weeklyTrend": "Тижневий тренд калорій",
+    "calories": "Калорії",
+    "protein": "Білки",
+    "carbs": "Вуглеводи",
+    "fat": "Жири"
+  },
+  "timeline": {
+    "title": "Хронологія дня",
+    "noMeals": "Сьогодні страв не записано",
+    "addFirst": "Запишіть свою першу страву!"
+  }
+}

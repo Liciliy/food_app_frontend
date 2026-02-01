@@ -4,6 +4,7 @@
  */
 
 import { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Flame, Calendar, TrendingUp, UtensilsCrossed } from 'lucide-react';
 import { useMealStore } from '../../stores/mealStore';
 import { formatCalories } from '../../utils';
@@ -54,6 +55,7 @@ function StatCard({ title, value, subtitle, icon, color }: StatCardProps) {
  * Dashboard stats component
  */
 export function DashboardStats() {
+  const { t } = useTranslation(['dashboard', 'common']);
   const { dashboardData, isLoading, fetchDashboard } = useMealStore();
 
   useEffect(() => {
@@ -77,7 +79,7 @@ export function DashboardStats() {
   if (!dashboardData) {
     return (
       <div className="bg-white rounded-xl border border-gray-200 p-6 text-center">
-        <p className="text-gray-500">Unable to load dashboard data</p>
+        <p className="text-gray-500">{t('common:unableToLoad')}</p>
       </div>
     );
   }
@@ -85,15 +87,15 @@ export function DashboardStats() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       <StatCard
-        title="Today's Calories"
+        title={t('stats.todayCalories')}
         value={formatCalories(dashboardData.today.calories)}
-        subtitle={`${dashboardData.today.meal_count} meals logged`}
+        subtitle={t('stats.mealsLogged', { count: dashboardData.today.meal_count })}
         icon={<Flame className="w-6 h-6" />}
         color="orange"
       />
       
       <StatCard
-        title="Today's Meals"
+        title={t('stats.todayMeals')}
         value={dashboardData.today.meal_count}
         subtitle={dashboardData.today.date}
         icon={<UtensilsCrossed className="w-6 h-6" />}
@@ -101,17 +103,17 @@ export function DashboardStats() {
       />
       
       <StatCard
-        title="This Week"
+        title={t('common:thisWeek')}
         value={formatCalories(dashboardData.this_week.calories)}
-        subtitle={`Avg ${formatCalories(dashboardData.this_week.average_daily_calories)}/day`}
+        subtitle={`${formatCalories(dashboardData.this_week.average_daily_calories)} ${t('stats.perDay')}`}
         icon={<Calendar className="w-6 h-6" />}
         color="green"
       />
       
       <StatCard
-        title="This Month"
+        title={t('common:thisMonth')}
         value={formatCalories(dashboardData.this_month.calories)}
-        subtitle={`${dashboardData.this_month.meal_count} meals total`}
+        subtitle={t('stats.totalMeals', { count: dashboardData.this_month.meal_count })}
         icon={<TrendingUp className="w-6 h-6" />}
         color="purple"
       />

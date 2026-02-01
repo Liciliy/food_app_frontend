@@ -4,6 +4,7 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Mic, Square, RotateCcw, Loader2, CheckCircle, Upload, Undo2 } from 'lucide-react';
 import { useVoiceRecorder } from '../../hooks/useVoiceRecorder';
 import { useMealStore } from '../../stores/mealStore';
@@ -28,6 +29,7 @@ function formatDuration(seconds: number): string {
  * Provides visual interface for recording meal descriptions
  */
 export function VoiceRecorder() {
+  const { t } = useTranslation('meals');
   const [showSuccess, setShowSuccess] = useState(false);
   const [showRevertButton, setShowRevertButton] = useState(false);
   const [revertCountdown, setRevertCountdown] = useState(REVERT_BUTTON_DISPLAY_SECONDS);
@@ -301,11 +303,11 @@ export function VoiceRecorder() {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
       <h2 className="text-lg font-semibold text-gray-900 mb-4 text-center">
-        🎤 Log Your Meal
+        🎤 {t('voiceRecorder.title')}
       </h2>
       
       <p className="text-sm text-gray-600 text-center mb-6">
-        Describe what you just ate and our AI will analyze the nutritional content
+        {t('voiceRecorder.subtitle')}
       </p>
 
       {/* Error Display */}
@@ -323,7 +325,7 @@ export function VoiceRecorder() {
             <div>
               <p className="text-sm font-medium text-green-800">{successMessage}</p>
               <p className="text-xs text-green-700 mt-1">
-                {currentMeal.food_items?.length || 0} food items detected
+                {t('voiceRecorder.foodItemsDetected', { count: currentMeal.food_items?.length || 0 })}
               </p>
             </div>
           </div>
@@ -399,11 +401,11 @@ export function VoiceRecorder() {
           <p className="text-xs text-gray-500 mt-1">
             {isRecording 
               ? recordingMode === 'hold' 
-                ? 'Recording... (release to stop)' 
-                : 'Recording... (click to stop or wait for silence)'
+                ? t('voiceRecorder.releaseToStop')
+                : t('voiceRecorder.tapToStop')
               : audioBlob 
-              ? 'Recording complete' 
-              : 'Max 5 minutes'
+              ? t('voiceRecorder.recordingComplete')
+              : t('voiceRecorder.maxDuration')
             }
           </p>
         </div>
@@ -420,7 +422,7 @@ export function VoiceRecorder() {
               <div className="mt-2 text-center">
                 <div className="flex items-center justify-center text-primary-600">
                   <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  <span className="text-sm font-medium">Analyzing your meal...</span>
+                  <span className="text-sm font-medium">{t('voiceRecorder.analyzing')}</span>
                 </div>
               </div>
             )}
@@ -437,7 +439,7 @@ export function VoiceRecorder() {
                 className="flex items-center"
               >
                 <RotateCcw className="w-4 h-4 mr-2" />
-                New Recording
+                {t('voiceRecorder.newRecording')}
               </Button>
               
               <Button
@@ -445,7 +447,7 @@ export function VoiceRecorder() {
                 className="flex items-center"
               >
                 <Upload className="w-4 h-4 mr-2" />
-                Retry Analysis
+                {t('voiceRecorder.retryAnalysis')}
               </Button>
             </>
           )}
@@ -455,18 +457,18 @@ export function VoiceRecorder() {
         {!isRecording && !audioBlob && !isUploading && !showRevertButton && (
           <div className="mt-6 text-center">
             <p className="text-xs text-gray-500 font-medium mb-2">
-              Two ways to record:
+              {t('voiceRecorder.instructions.title')}
             </p>
             <div className="space-y-1">
               <p className="text-xs text-gray-500">
-                <span className="font-semibold">Press & hold:</span> Record while holding, release to stop
+                <span className="font-semibold">{t('voiceRecorder.instructions.pressHold')}:</span> {t('voiceRecorder.instructions.pressHoldDesc')}
               </p>
               <p className="text-xs text-gray-500">
-                <span className="font-semibold">Quick tap:</span> Click to start, click again or pause for 3s to stop
+                <span className="font-semibold">{t('voiceRecorder.instructions.quickTap')}:</span> {t('voiceRecorder.instructions.quickTapDesc')}
               </p>
             </div>
             <p className="text-xs text-gray-400 mt-3">
-              Example: "I had two eggs with toast and orange juice for breakfast"
+              {t('voiceRecorder.instructions.example')}
             </p>
           </div>
         )}
@@ -480,7 +482,7 @@ export function VoiceRecorder() {
               className="w-full flex items-center justify-center text-amber-700 border-amber-300 hover:bg-amber-50 hover:border-amber-400"
             >
               <Undo2 className="w-4 h-4 mr-2" />
-              Undo meal ({revertCountdown}s)
+              {t('voiceRecorder.undoMeal', { seconds: revertCountdown })}
             </Button>
           </div>
         )}
@@ -494,7 +496,7 @@ export function VoiceRecorder() {
               className="w-full flex items-center justify-center"
             >
               <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Undoing...
+              {t('voiceRecorder.undoing')}
             </Button>
           </div>
         )}

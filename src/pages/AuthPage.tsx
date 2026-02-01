@@ -4,8 +4,10 @@
  */
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { LoginForm } from '../components/auth/LoginForm';
 import { RegisterForm } from '../components/auth/RegisterForm';
+import { LanguageSwitcher } from '../components/common/LanguageSwitcher';
 
 type AuthMode = 'login' | 'register';
 
@@ -14,10 +16,16 @@ type AuthMode = 'login' | 'register';
  * Provides both login and registration functionality with tab switching
  */
 export function AuthPage() {
+  const { t } = useTranslation('auth');
   const [mode, setMode] = useState<AuthMode>('login');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 flex items-center justify-center px-4 py-8">
+      {/* Language Switcher - Fixed position top right */}
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageSwitcher />
+      </div>
+
       <div className="w-full max-w-md">
         {/* Tab Navigation */}
         <div className="mb-6">
@@ -30,7 +38,7 @@ export function AuthPage() {
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              Sign In
+              {t('login.signIn')}
             </button>
             <button
               onClick={() => setMode('register')}
@@ -40,7 +48,7 @@ export function AuthPage() {
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
-              Sign Up
+              {t('register.signUp')}
             </button>
           </div>
         </div>
@@ -55,33 +63,32 @@ export function AuthPage() {
         {/* App Info */}
         <div className="mt-8 text-center">
           <h2 className="text-lg font-semibold text-gray-900 mb-2">
-            🍽️ Food Tracking App
+            🍽️ {t('appInfo.title')}
           </h2>
           <p className="text-sm text-gray-600 max-w-sm mx-auto">
-            Track your meals with AI-powered voice recognition. 
-            Simply speak what you ate and let our AI analyze the nutritional content.
+            {t('appInfo.description')}
           </p>
         </div>
 
         {/* Features */}
         <div className="mt-6 bg-white rounded-lg p-4 shadow-sm border border-gray-200">
-          <h3 className="text-sm font-medium text-gray-900 mb-3">Features:</h3>
+          <h3 className="text-sm font-medium text-gray-900 mb-3">{t('appInfo.features')}</h3>
           <ul className="space-y-2 text-xs text-gray-600">
             <li className="flex items-center">
               <span className="text-green-500 mr-2">✓</span>
-              Voice-powered meal logging
+              {t('appInfo.feature1')}
             </li>
             <li className="flex items-center">
               <span className="text-green-500 mr-2">✓</span>
-              AI nutritional analysis
+              {t('appInfo.feature2')}
             </li>
             <li className="flex items-center">
               <span className="text-green-500 mr-2">✓</span>
-              Comprehensive statistics
+              {t('appInfo.feature3')}
             </li>
             <li className="flex items-center">
               <span className="text-green-500 mr-2">✓</span>
-              Daily, weekly & monthly insights
+              {t('appInfo.feature4')}
             </li>
           </ul>
         </div>

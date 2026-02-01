@@ -3,9 +3,10 @@
  * Displays a single meal with nutritional information
  */
 
+import { useTranslation } from 'react-i18next';
 import { Clock, Utensils, Flame } from 'lucide-react';
 import type { Meal } from '../../types';
-import { formatTime, formatMealTime, formatCalories, formatMacros, capitalize } from '../../utils';
+import { formatTime, formatMealTime, formatCalories, formatMacros } from '../../utils';
 import { cn } from '../../utils';
 
 interface MealCardProps {
@@ -17,18 +18,18 @@ interface MealCardProps {
 /**
  * Get meal type icon and color
  */
-function getMealTypeStyle(mealType: string): { bgColor: string; textColor: string; icon: string } {
+function getMealTypeStyle(mealType: string): { bgColor: string; textColor: string; icon: string; translationKey: string } {
   switch (mealType) {
     case 'breakfast':
-      return { bgColor: 'bg-yellow-100', textColor: 'text-yellow-700', icon: '🌅' };
+      return { bgColor: 'bg-yellow-100', textColor: 'text-yellow-700', icon: '🌅', translationKey: 'mealTypes.breakfast' };
     case 'lunch':
-      return { bgColor: 'bg-orange-100', textColor: 'text-orange-700', icon: '☀️' };
+      return { bgColor: 'bg-orange-100', textColor: 'text-orange-700', icon: '☀️', translationKey: 'mealTypes.lunch' };
     case 'dinner':
-      return { bgColor: 'bg-purple-100', textColor: 'text-purple-700', icon: '🌙' };
+      return { bgColor: 'bg-purple-100', textColor: 'text-purple-700', icon: '🌙', translationKey: 'mealTypes.dinner' };
     case 'snack':
-      return { bgColor: 'bg-green-100', textColor: 'text-green-700', icon: '🍎' };
+      return { bgColor: 'bg-green-100', textColor: 'text-green-700', icon: '🍎', translationKey: 'mealTypes.snack' };
     default:
-      return { bgColor: 'bg-gray-100', textColor: 'text-gray-700', icon: '🍽️' };
+      return { bgColor: 'bg-gray-100', textColor: 'text-gray-700', icon: '🍽️', translationKey: 'mealTypes.unknown' };
   }
 }
 
@@ -37,6 +38,7 @@ function getMealTypeStyle(mealType: string): { bgColor: string; textColor: strin
  * Shows meal summary with food items and macros
  */
 export function MealCard({ meal, onClick, compact = false }: MealCardProps) {
+  const { t } = useTranslation('meals');
   const mealType = meal.meal_type || 'unknown';
   const mealStyle = getMealTypeStyle(mealType);
   const consumedTime = meal.consumed_at ? formatTime(meal.consumed_at) : '--:--';
@@ -59,7 +61,7 @@ export function MealCard({ meal, onClick, compact = false }: MealCardProps) {
             mealStyle.bgColor,
             mealStyle.textColor
           )}>
-            {mealStyle.icon} {capitalize(mealType)}
+            {mealStyle.icon} {t(mealStyle.translationKey)}
           </span>
           <div className="flex items-center text-xs text-gray-500" title={consumedDateTime || undefined}>
             <Clock className="w-3 h-3 mr-1" />
@@ -69,7 +71,7 @@ export function MealCard({ meal, onClick, compact = false }: MealCardProps) {
         
         <div className="flex items-center text-primary-600 font-semibold">
           <Flame className="w-4 h-4 mr-1" />
-          {formatCalories(meal.total_calories)} cal
+          {formatCalories(meal.total_calories)} {t('common:calories', { context: 'short' })}
         </div>
       </div>
 
@@ -85,7 +87,7 @@ export function MealCard({ meal, onClick, compact = false }: MealCardProps) {
         <div className="space-y-2 mb-3">
           <div className="flex items-center text-xs text-gray-500 mb-1">
             <Utensils className="w-3 h-3 mr-1" />
-            {meal.food_items.length} items
+            {t('mealCard.itemsCount', { count: meal.food_items.length })}
           </div>
           <div className="flex flex-wrap gap-1">
             {meal.food_items.slice(0, 5).map((item) => (
@@ -101,7 +103,7 @@ export function MealCard({ meal, onClick, compact = false }: MealCardProps) {
             ))}
             {meal.food_items.length > 5 && (
               <span className="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-500 text-xs rounded-full">
-                +{meal.food_items.length - 5} more
+                {t('mealCard.moreItems', { count: meal.food_items.length - 5 })}
               </span>
             )}
           </div>
@@ -113,7 +115,7 @@ export function MealCard({ meal, onClick, compact = false }: MealCardProps) {
         <div className="flex items-center space-x-4 pt-2 border-t border-gray-100">
           <div className="flex-1">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-gray-500">Protein</span>
+              <span className="text-gray-500">{t('macros.protein')}</span>
               <span className="font-medium text-blue-600">
                 {formatMacros(meal.macros.protein ?? 0)}
               </span>
@@ -128,7 +130,7 @@ export function MealCard({ meal, onClick, compact = false }: MealCardProps) {
           
           <div className="flex-1">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-gray-500">Carbs</span>
+              <span className="text-gray-500">{t('macros.carbs')}</span>
               <span className="font-medium text-yellow-600">
                 {formatMacros(meal.macros.carbs ?? 0)}
               </span>
@@ -143,7 +145,7 @@ export function MealCard({ meal, onClick, compact = false }: MealCardProps) {
           
           <div className="flex-1">
             <div className="flex items-center justify-between text-xs">
-              <span className="text-gray-500">Fat</span>
+              <span className="text-gray-500">{t('macros.fat')}</span>
               <span className="font-medium text-red-600">
                 {formatMacros(meal.macros.fat ?? 0)}
               </span>
@@ -171,7 +173,7 @@ export function MealCard({ meal, onClick, compact = false }: MealCardProps) {
       {!compact && meal.consumed_at_raw && (
         <div className="mt-2">
           <p className="text-xs text-gray-400">
-            Time detected: "{meal.consumed_at_raw}"
+            {t('mealCard.timeDetected')}: "{meal.consumed_at_raw}"
           </p>
         </div>
       )}

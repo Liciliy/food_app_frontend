@@ -4,6 +4,7 @@
  */
 
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Target, TrendingUp, TrendingDown } from 'lucide-react';
 import type { MonthlyStats } from '../../types';
 
@@ -21,6 +22,8 @@ export function CalorieGoalProgress({
   dailyGoal = 2000,
   isLoading 
 }: CalorieGoalProgressProps) {
+  const { t } = useTranslation('stats');
+  
   const stats = useMemo(() => {
     if (!monthlyStats) {
       return {
@@ -62,9 +65,9 @@ export function CalorieGoalProgress({
   if (isLoading) {
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Monthly Progress</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('charts.monthlyProgress')}</h3>
         <div className="h-48 flex items-center justify-center">
-          <div className="animate-pulse text-gray-400">Loading...</div>
+          <div className="animate-pulse text-gray-400">{t('charts.loading')}</div>
         </div>
       </div>
     );
@@ -74,17 +77,13 @@ export function CalorieGoalProgress({
     stats.progress >= 90 && stats.progress <= 110 ? 'text-green-600' :
     stats.progress < 80 ? 'text-yellow-600' : 'text-red-600';
 
-  const progressBgColor = 
-    stats.progress >= 90 && stats.progress <= 110 ? 'bg-green-500' :
-    stats.progress < 80 ? 'bg-yellow-500' : 'bg-red-500';
-
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">Monthly Progress</h3>
+        <h3 className="text-lg font-semibold text-gray-900">{t('charts.monthlyProgress')}</h3>
         <div className="flex items-center text-sm text-gray-500">
           <Target className="w-4 h-4 mr-1" />
-          Goal: {dailyGoal.toLocaleString()} kcal/day
+          {t('charts.goal')}: {dailyGoal.toLocaleString()} {t('summary.kcal')}/{t('period.day').toLowerCase()}
         </div>
       </div>
 
@@ -117,7 +116,7 @@ export function CalorieGoalProgress({
             <span className={`text-2xl font-bold ${progressColor}`}>
               {Math.round(stats.progress)}%
             </span>
-            <span className="text-xs text-gray-500">of goal</span>
+            <span className="text-xs text-gray-500">{t('charts.ofGoal')}</span>
           </div>
         </div>
       </div>
@@ -125,17 +124,17 @@ export function CalorieGoalProgress({
       {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-4">
         <div className="text-center p-3 bg-gray-50 rounded-lg">
-          <p className="text-xs text-gray-500 mb-1">Total Consumed</p>
+          <p className="text-xs text-gray-500 mb-1">{t('charts.totalConsumed')}</p>
           <p className="text-lg font-bold text-gray-900">
             {stats.totalCalories.toLocaleString()}
-            <span className="text-sm font-normal text-gray-500 ml-1">kcal</span>
+            <span className="text-sm font-normal text-gray-500 ml-1">{t('summary.kcal')}</span>
           </p>
         </div>
         <div className="text-center p-3 bg-gray-50 rounded-lg">
-          <p className="text-xs text-gray-500 mb-1">Daily Average</p>
+          <p className="text-xs text-gray-500 mb-1">{t('summary.dailyAverage')}</p>
           <p className="text-lg font-bold text-gray-900">
             {Math.round(stats.avgDaily).toLocaleString()}
-            <span className="text-sm font-normal text-gray-500 ml-1">kcal</span>
+            <span className="text-sm font-normal text-gray-500 ml-1">{t('summary.kcal')}</span>
           </p>
         </div>
       </div>
@@ -143,7 +142,7 @@ export function CalorieGoalProgress({
       {/* Variance Indicator */}
       <div className="mt-4 pt-4 border-t border-gray-100">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-gray-600">Daily variance from goal</span>
+          <span className="text-sm text-gray-600">{t('charts.dailyVariance')}</span>
           <div className={`flex items-center ${stats.variance > 0 ? 'text-red-600' : stats.variance < -200 ? 'text-yellow-600' : 'text-green-600'}`}>
             {stats.variance > 0 ? (
               <TrendingUp className="w-4 h-4 mr-1" />
@@ -151,7 +150,7 @@ export function CalorieGoalProgress({
               <TrendingDown className="w-4 h-4 mr-1" />
             )}
             <span className="font-medium">
-              {stats.variance > 0 ? '+' : ''}{Math.round(stats.variance)} kcal
+              {stats.variance > 0 ? '+' : ''}{Math.round(stats.variance)} {t('summary.kcal')}
             </span>
           </div>
         </div>

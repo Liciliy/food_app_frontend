@@ -5,10 +5,12 @@
 
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { BarChart3 } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
 import { useMealStore } from '../stores/mealStore';
 import { Button } from '../components/common/Button';
+import { LanguageSwitcher } from '../components/common/LanguageSwitcher';
 import { VoiceRecorder } from '../components/meals/VoiceRecorder';
 import { DashboardStats } from '../components/meals/DashboardStats';
 import { RecentMeals } from '../components/meals/RecentMeals';
@@ -20,6 +22,7 @@ import { DailyNutritionChart, WeeklyCalorieTrend, MacroDistributionChart } from 
  * Main hub for meal logging and statistics overview
  */
 export function DashboardPage() {
+  const { t } = useTranslation(['dashboard', 'auth']);
   const { user, logout, isLoading: authLoading } = useAuthStore();
   const { 
     dailyStats, 
@@ -51,15 +54,16 @@ export function DashboardPage() {
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
               <h1 className="text-xl font-semibold text-gray-900">
-                🍽️ Food Tracker
+                🍽️ {t('title')}
               </h1>
             </div>
             
             <div className="flex items-center space-x-3">
+              <LanguageSwitcher variant="buttons" />
               <Link to="/statistics">
                 <Button variant="outline" size="sm">
                   <BarChart3 className="w-4 h-4 mr-2" />
-                  Statistics
+                  {t('statistics')}
                 </Button>
               </Link>
               <span className="text-sm text-gray-600 hidden sm:block">
@@ -71,7 +75,7 @@ export function DashboardPage() {
                 onClick={handleLogout}
                 isLoading={authLoading}
               >
-                Sign Out
+                {t('auth:signOut')}
               </Button>
             </div>
           </div>

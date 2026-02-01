@@ -4,6 +4,7 @@
  */
 
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   RadarChart,
   PolarGrid,
@@ -42,6 +43,8 @@ function CustomTooltip({ active, payload }: any) {
  * Weekday comparison radar chart
  */
 export function WeekdayComparison({ weeklyStats, isLoading }: WeekdayComparisonProps) {
+  const { t } = useTranslation('stats');
+  
   const chartData = useMemo(() => {
     if (!weeklyStats?.daily_breakdown) {
       return [];
@@ -86,9 +89,9 @@ export function WeekdayComparison({ weeklyStats, isLoading }: WeekdayComparisonP
   if (isLoading) {
     return (
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Weekday vs Weekend</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('charts.weekdayComparison')}</h3>
         <div className="h-48 flex items-center justify-center">
-          <div className="animate-pulse text-gray-400">Loading...</div>
+          <div className="animate-pulse text-gray-400">{t('charts.loading')}</div>
         </div>
       </div>
     );
@@ -96,11 +99,11 @@ export function WeekdayComparison({ weeklyStats, isLoading }: WeekdayComparisonP
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-      <h3 className="text-lg font-semibold text-gray-900 mb-4">Daily Calorie Pattern</h3>
+      <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('charts.weekdayComparison')}</h3>
       
       {chartData.length === 0 ? (
         <div className="h-48 flex items-center justify-center text-gray-400">
-          No data available
+          {t('charts.noData')}
         </div>
       ) : (
         <>
