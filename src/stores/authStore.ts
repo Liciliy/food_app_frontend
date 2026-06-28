@@ -11,7 +11,9 @@ import type {
   AuthState, 
   LoginRequest, 
   RegisterRequest, 
-  ApiError 
+  ApiError,
+  ProfileUpdateRequest,
+  User,
 } from '../types';
 
 /**
@@ -23,6 +25,8 @@ interface AuthActions {
   verifyEmail: (key: string) => Promise<void>;
   resendVerificationEmail: (email: string) => Promise<void>;
   logout: () => Promise<void>;
+  updateProfile: (data: ProfileUpdateRequest) => Promise<User>;
+  uploadHealthContextVoice: (audio: File, healthContextAppliedAt?: string) => Promise<User>;
   clearError: () => void;
   clearSuccess: () => void;
   initializeAuth: () => Promise<void>;
@@ -216,6 +220,58 @@ export const useAuthStore = create<AuthStore>()(
             error: null,
             successMessage: null,
           });
+        }
+      },
+
+      /**
+       * Update current user profile.
+       */
+      updateProfile: async (data: ProfileUpdateRequest) => {
+        set({ isLoading: true, error: null, successMessage: null });
+
+        try {
+          const user = await AuthService.updateProfile(data);
+          set({
+            user,
+            isLoading: false,
+            error: null,
+            successMessage: 'Profile updated successfully.',
+          });
+          return user;
+        } catch (error) {
+          const apiError = error as ApiError;
+          const errorMessage = apiError.detail || 'Failed to update profile.';
+          set({
+            isLoading: false,
+            error: errorMessage,
+          });
+          throw error;
+        }
+      },
+
+      /**
+       * Upload voice note for health context updates.
+       */
+      uploadHealthContextVoice: async (audio: File, healthContextAppliedAt?: string) => {
+        set({ isLoading: true, error: null, successMessage: null });
+
+        try {
+          const response = await AuthService.uploadHealthContextVoice(audio, healthContextAppliedAt);
+          set({
+            user: response.profile,
+            isLoading: false,
+            error: null,
+            successMessage: 'Health context updated from voice note.',
+          });
+          return response.profile;
+        } catch (error) {
+          const apiError = error as ApiError;
+          const errorMessage = apiError.detail || 'Failed to update health context from voice note.';
+          set({
+            isLoading: false,
+            error: errorMessage,
+          });
+          throw error;
         }
       },
 

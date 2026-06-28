@@ -11,6 +11,7 @@ import type { Meal } from '../../types';
 import { useMealStore } from '../../stores/mealStore';
 import { formatTime, formatCalories, formatMacros } from '../../utils';
 import { cn } from '../../utils';
+import { MicronutrientsSection } from './MicronutrientsSection';
 
 /** Delete window in seconds (3 hours) */
 const DELETE_WINDOW_SECONDS = 3 * 60 * 60;
@@ -89,6 +90,8 @@ function getMealTypeColor(mealType: string): string {
     lunch: 'bg-orange-500',
     dinner: 'bg-purple-500',
     snack: 'bg-green-500',
+    water: 'bg-cyan-500',
+    drinks: 'bg-sky-500',
     unknown: 'bg-gray-500',
   };
   return colors[mealType] || 'bg-gray-500';
@@ -107,6 +110,10 @@ function getMealTypeStyle(mealType: string): { bgColor: string; textColor: strin
       return { bgColor: 'bg-purple-100', textColor: 'text-purple-700', icon: '🌙', translationKey: 'mealTypes.dinner' };
     case 'snack':
       return { bgColor: 'bg-green-100', textColor: 'text-green-700', icon: '🍎', translationKey: 'mealTypes.snack' };
+    case 'water':
+      return { bgColor: 'bg-cyan-100', textColor: 'text-cyan-700', icon: '💧', translationKey: 'mealTypes.water' };
+    case 'drinks':
+      return { bgColor: 'bg-sky-100', textColor: 'text-sky-700', icon: '🥤', translationKey: 'mealTypes.drinks' };
     default:
       return { bgColor: 'bg-gray-100', textColor: 'text-gray-700', icon: '🍽️', translationKey: 'mealTypes.unknown' };
   }
@@ -614,6 +621,8 @@ export function DayTimeline({ meals, isLoading }: DayTimelineProps) {
                           </div>
                         </div>
                       )}
+
+                      <MicronutrientsSection meal={meal} className="mt-4" />
                     </div>
                   );
                 })()}

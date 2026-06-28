@@ -31,6 +31,7 @@
     "calories": "cal",
     "itemsCount": "{{count}} items",
     "itemsCount_one": "{{count}} item",
+    "consumedWeight": "Consumed: {{grams}} g",
     "protein": "Protein",
     "carbs": "Carbs",
     "fat": "Fat",
@@ -43,11 +44,20 @@
     "carbs": "Carbs",
     "fat": "Fat"
   },
+  "micronutrients": {
+    "title": "Micronutrients",
+    "summary": "{{count}} nutrient rows across {{items}} item groups",
+    "summary_one": "{{count}} nutrient row across {{items}} item group",
+    "mealLevel": "Meal total",
+    "itemLevel": "Per item"
+  },
   "mealTypes": {
     "breakfast": "Breakfast",
     "lunch": "Lunch",
     "dinner": "Dinner",
     "snack": "Snack",
+    "water": "Water",
+    "drinks": "Drinks",
     "unknown": "Meal"
   },
   "recentMeals": {

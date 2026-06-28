@@ -4,6 +4,7 @@
  */
 
 import { apiClient } from './api';
+import { createFormData } from './api';
 import type { 
   User, 
   AuthResponse, 
@@ -11,7 +12,9 @@ import type {
   RegisterRequest,
   RegisterResponse,
   VerifyEmailRequest,
-  ResendVerificationRequest
+  ResendVerificationRequest,
+  ProfileUpdateRequest,
+  HealthContextVoiceUploadResponse,
 } from '../types';
 
 /**
@@ -75,6 +78,33 @@ export class AuthService {
    */
   static async getCurrentUser(): Promise<User> {
     const response = await apiClient.get<User>('/auth/profile/');
+    return response.data;
+  }
+
+  /**
+   * Update current user profile and health context fields.
+   */
+  static async updateProfile(data: ProfileUpdateRequest): Promise<User> {
+    const response = await apiClient.patch<User>('/auth/profile/update/', data);
+    return response.data;
+  }
+
+  /**
+   * Upload voice audio for health context updates.
+   */
+  static async uploadHealthContextVoice(audio: File, healthContextAppliedAt?: string): Promise<HealthContextVoiceUploadResponse> {
+    const formData = createFormData({
+      audio,
+      health_context_applied_at: healthContextAppliedAt,
+    });
+
+    const response = await apiClient.post<HealthContextVoiceUploadResponse>('/auth/profile/health-context/voice/', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      timeout: 60000,
+    });
+
     return response.data;
   }
 

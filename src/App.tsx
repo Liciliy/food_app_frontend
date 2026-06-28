@@ -7,6 +7,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthGuard } from './components/auth/AuthGuard';
 import { AuthPage } from './pages/AuthPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { ProfilePage } from './pages/ProfilePage';
 import { StatisticsPage } from './pages/StatisticsPage';
 import { VerifyEmailPage } from './pages/VerifyEmailPage';
 import { useAuthStore } from './stores/authStore';
@@ -54,6 +55,15 @@ function App() {
                 <StatisticsPage />
               </AuthGuard>
             } 
+          />
+
+          <Route
+            path="/profile"
+            element={
+              <AuthGuard fallback={<AuthPage />}>
+                <ProfilePage />
+              </AuthGuard>
+            }
           />
           
           {/* Root redirect */}

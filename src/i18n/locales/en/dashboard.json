@@ -1,6 +1,7 @@
 {
   "title": "Food Tracker",
   "statistics": "Statistics",
+  "profile": "Profile",
   "stats": {
     "todayCalories": "Today's Calories",
     "todayMeals": "Today's Meals",

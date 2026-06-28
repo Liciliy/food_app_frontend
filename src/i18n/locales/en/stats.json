@@ -1,6 +1,10 @@
 {
   "title": "Statistics & Insights",
   "backToDashboard": "Back to Dashboard",
+  "navigation": {
+    "analytics": "Analytics",
+    "reports": "Reports"
+  },
   "period": {
     "day": "Day",
     "week": "Week",
@@ -77,5 +81,59 @@
     "progress": "{{current}} / {{target}} kcal",
     "remaining": "{{count}} kcal remaining",
     "exceeded": "{{count}} kcal over target"
+  },
+  "reports": {
+    "currentTitle": "Current Nutrition Report",
+    "periodDescriptions": {
+      "day": "Rule-based findings and summary for the selected day.",
+      "week": "Average intake review for the selected week.",
+      "month": "Longer trend review for the selected month."
+    },
+    "generatedTitle": "Generated Reports",
+    "generatedCount": "{{count}} saved reports",
+    "generatedEmpty": "No saved generated reports yet.",
+    "generatedFallbackTitle": "Nutrition report",
+    "generatedUnknownPeriod": "Period unavailable",
+    "detailTitle": "Generated Report Detail",
+    "detailPlaceholder": "Select a generated report to open it.",
+    "detailEmpty": "Open a saved report from the list to see its full content.",
+    "flagsTitle": "Flags",
+    "noFlags": "No nutrient flags were raised for this period.",
+    "narrativeTitle": "Narrative Summary",
+    "narrativeEmpty": "No narrative summary is available for this period.",
+    "risks": "Risks",
+    "recommendations": "Recommendations",
+    "followUp": "Follow-up",
+    "nutrientTotalsTitle": "Nutrient Totals",
+    "nutrientTotalsEmpty": "No nutrient totals were returned for this period.",
+    "healthContextTitle": "Health Context Used",
+    "healthContextEmpty": "No health context was applied to this report.",
+    "healthContextAppliedAt": "Applied from {{date}}",
+    "placeholder": {
+      "waitingTitle": "Report not generated yet",
+      "waitingMessage": "This period does not have a persisted report yet. Please check back later.",
+      "noMealsTitle": "No logged meals for this period",
+      "noMealsMessage": "There were no logged meals in this period, so no persisted report is available.",
+      "period": "Period: {{start}} to {{end}}"
+    },
+    "loggingCoverage": {
+      "missingDays": "Some days were not logged for this period. The report may be less accurate.",
+      "missingWeeks": "Some weeks were not logged: {{weeks}}. The report may be less accurate."
+    },
+    "summary": {
+      "calories": "Calories",
+      "meals": "Meals",
+      "protein": "Protein",
+      "context": "Context",
+      "applied": "Applied",
+      "none": "None"
+    },
+    "unread": "Unread",
+    "empty": "No report data is available for this period yet.",
+    "errors": {
+      "loadCurrent": "Failed to load the current report.",
+      "loadGenerated": "Failed to load generated reports.",
+      "loadDetail": "Failed to load this generated report."
+    }
   }
 }

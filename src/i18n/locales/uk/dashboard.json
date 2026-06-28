@@ -1,6 +1,7 @@
 {
   "title": "Трекер Їжі",
   "statistics": "Статистика",
+  "profile": "Профіль",
   "stats": {
     "todayCalories": "Калорії сьогодні",
     "todayMeals": "Страви сьогодні",

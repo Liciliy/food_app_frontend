@@ -8,6 +8,7 @@ import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronUp, Clock, Flame, Utensils } from 'lucide-react';
 import type { Meal } from '../../types';
 import { formatTime, formatCalories, formatMacros } from '../../utils';
+import { MicronutrientsSection } from '../meals/MicronutrientsSection';
 
 interface MealHistoryListProps {
   meals: Meal[];
@@ -27,6 +28,10 @@ function getMealTypeStyle(mealType: string) {
       return { bg: 'bg-purple-100', text: 'text-purple-700', icon: '🌙', translationKey: 'meals:mealTypes.dinner' };
     case 'snack':
       return { bg: 'bg-green-100', text: 'text-green-700', icon: '🍎', translationKey: 'meals:mealTypes.snack' };
+    case 'water':
+      return { bg: 'bg-cyan-100', text: 'text-cyan-700', icon: '💧', translationKey: 'meals:mealTypes.water' };
+    case 'drinks':
+      return { bg: 'bg-sky-100', text: 'text-sky-700', icon: '🥤', translationKey: 'meals:mealTypes.drinks' };
     default:
       return { bg: 'bg-gray-100', text: 'text-gray-700', icon: '🍽️', translationKey: 'meals:mealTypes.unknown' };
   }
@@ -85,6 +90,12 @@ function MealItem({ meal }: { meal: Meal }) {
             </p>
           )}
 
+          {meal.consumed_weight_grams != null && (
+            <p className="mb-4 text-xs text-gray-500">
+              {t('meals:mealCard.consumedWeight', { grams: Math.round(Number(meal.consumed_weight_grams) || 0) })}
+            </p>
+          )}
+
           {/* Macros */}
           <div className="grid grid-cols-3 gap-3 mb-4">
             <div className="text-center p-2 bg-blue-50 rounded-lg">
@@ -137,6 +148,8 @@ function MealItem({ meal }: { meal: Meal }) {
               </div>
             </div>
           )}
+
+          <MicronutrientsSection meal={meal} className="mt-4" />
 
           {/* Voice Transcription */}
           {typeof meal.voice_input === 'object' && meal.voice_input?.transcription && (

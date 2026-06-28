@@ -10,7 +10,10 @@ import type {
   DashboardOverview, 
   DailyStats,
   WeeklyStats,
-  MonthlyStats
+  MonthlyStats,
+  NutritionReportData,
+  PaginatedGeneratedNutritionReports,
+  GeneratedNutritionReportDetail,
 } from '../types';
 
 /**
@@ -163,6 +166,61 @@ export class MealService {
       params: month ? { month } : undefined,
     });
     return response.data;
+  }
+
+  /**
+   * Get daily nutrition report.
+   */
+  static async getDailyReport(date?: string): Promise<NutritionReportData> {
+    const response = await apiClient.get<NutritionReportData>('/food/meals/reports/daily/', {
+      params: date ? { date } : undefined,
+    });
+    return response.data;
+  }
+
+  /**
+   * Get weekly nutrition report.
+   */
+  static async getWeeklyReport(week?: string): Promise<NutritionReportData> {
+    const response = await apiClient.get<NutritionReportData>('/food/meals/reports/weekly/', {
+      params: week ? { week } : undefined,
+    });
+    return response.data;
+  }
+
+  /**
+   * Get monthly nutrition report.
+   */
+  static async getMonthlyReport(month?: string): Promise<NutritionReportData> {
+    const response = await apiClient.get<NutritionReportData>('/food/meals/reports/monthly/', {
+      params: month ? { month } : undefined,
+    });
+    return response.data;
+  }
+
+  /**
+   * Get generated nutrition reports list.
+   */
+  static async getGeneratedReports(params?: { unread_only?: boolean; page?: number; page_size?: number }): Promise<PaginatedGeneratedNutritionReports> {
+    const response = await apiClient.get<PaginatedGeneratedNutritionReports>('/food/meals/reports/generated/', {
+      params,
+    });
+    return response.data;
+  }
+
+  /**
+   * Get generated nutrition report detail.
+   */
+  static async getGeneratedReportDetail(reportId: number): Promise<GeneratedNutritionReportDetail> {
+    const response = await apiClient.get<GeneratedNutritionReportDetail>(`/food/meals/reports/generated/${reportId}/`);
+    return response.data;
+  }
+
+  /**
+   * Mark generated report as read.
+   */
+  static async markGeneratedReportRead(reportId: number): Promise<void> {
+    await apiClient.post(`/food/meals/reports/generated/${reportId}/mark-read/`);
   }
 
   /**

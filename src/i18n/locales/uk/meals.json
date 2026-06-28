@@ -32,6 +32,7 @@
     "itemsCount": "{{count}} продуктів",
     "itemsCount_one": "{{count}} продукт",
     "itemsCount_few": "{{count}} продукти",
+    "consumedWeight": "Спожито: {{grams}} г",
     "protein": "Білки",
     "carbs": "Вуглеводи",
     "fat": "Жири",
@@ -44,11 +45,21 @@
     "carbs": "Вуглеводи",
     "fat": "Жири"
   },
+  "micronutrients": {
+    "title": "Мікронутрієнти",
+    "summary": "{{count}} рядків нутрієнтів у {{items}} групах продуктів",
+    "summary_one": "{{count}} рядок нутрієнтів у {{items}} групі продуктів",
+    "summary_few": "{{count}} рядки нутрієнтів у {{items}} групах продуктів",
+    "mealLevel": "Сумарно по страві",
+    "itemLevel": "По продуктах"
+  },
   "mealTypes": {
     "breakfast": "Сніданок",
     "lunch": "Обід",
     "dinner": "Вечеря",
     "snack": "Перекус",
+    "water": "Вода",
+    "drinks": "Напої",
     "unknown": "Страва"
   },
   "recentMeals": {

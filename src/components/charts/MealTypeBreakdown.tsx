@@ -30,6 +30,8 @@ const MEAL_TYPE_CONFIG = {
   lunch: { color: '#f97316', icon: '☀️', labelKey: 'meals:mealTypes.lunch' },
   dinner: { color: '#8b5cf6', icon: '🌙', labelKey: 'meals:mealTypes.dinner' },
   snack: { color: '#22c55e', icon: '🍎', labelKey: 'meals:mealTypes.snack' },
+  water: { color: '#06b6d4', icon: '💧', labelKey: 'meals:mealTypes.water' },
+  drinks: { color: '#0ea5e9', icon: '🥤', labelKey: 'meals:mealTypes.drinks' },
   unknown: { color: '#6b7280', icon: '🍽️', labelKey: 'meals:mealTypes.unknown' },
 };
 

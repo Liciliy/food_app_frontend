@@ -13,6 +13,9 @@ export interface User {
   email: string;
   first_name: string;
   last_name: string;
+  health_context?: string | null;
+  health_context_applied_at?: string | null;
+  health_context_structured?: HealthContextStructured | null;
 }
 
 /**
@@ -68,7 +71,31 @@ export interface RegisterRequest {
 /**
  * Types of meals supported by the application
  */
-export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack';
+export type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'water' | 'drinks';
+
+export interface MicronutrientEntry {
+  nutrient_code: string;
+  nutrient_name: string;
+  amount: string | number;
+  unit: string;
+  food_item?: number | null;
+}
+
+export interface NutrientTotal {
+  name: string;
+  unit: string;
+  amount: number;
+}
+
+export interface HealthContextStructured {
+  profile_summary?: string | null;
+  life_stage?: string[];
+  dietary_patterns?: string[];
+  health_focus?: string[];
+  avoidances?: string[];
+  notes?: string[];
+  [key: string]: unknown;
+}
 
 /**
  * Nutritional macros breakdown
@@ -94,6 +121,8 @@ export interface FoodItem {
   protein_grams?: string | null;
   carbs_grams?: string | null;
   fat_grams?: string | null;
+  consumed_weight_grams?: string | number | null;
+  micronutrients?: MicronutrientEntry[] | null;
   extra_details?: Record<string, unknown>;
   created_at: string;
   updated_at: string;
@@ -140,6 +169,8 @@ export interface Meal {
   total_protein?: string | number;
   total_carbs?: string | number;
   total_fat?: string | number;
+  consumed_weight_grams?: string | number | null;
+  micronutrients?: MicronutrientEntry[] | null;
   macros?: Macros; // Computed macros object
   food_items?: FoodItem[];
 }
@@ -154,13 +185,12 @@ export interface DailyStats {
   total_calories: number;
   macros: Macros;
   meal_count: number;
-  meal_breakdown: {
-    [key in MealType]: {
-      count: number;
-      calories: number;
-      meals: Meal[];
-    };
-  };
+  meal_breakdown: Record<string, {
+    count: number;
+    calories: number;
+    meals: Meal[];
+  }>;
+  nutrient_totals?: Record<string, NutrientTotal>;
   meals: Meal[];
 }
 
@@ -185,6 +215,7 @@ export interface WeeklyStats {
   average_daily_calories: number;
   meal_count: number;
   daily_breakdown: Record<string, DayBreakdown>;
+  nutrient_totals?: Record<string, NutrientTotal>;
 }
 
 /**
@@ -199,6 +230,98 @@ export interface MonthlyStats {
   average_daily_calories: number;
   meal_count: number;
   days_in_month: number;
+  nutrient_totals?: Record<string, NutrientTotal>;
+}
+
+export interface NutritionReportFlag {
+  severity: 'low' | 'medium' | 'high' | string;
+  type: string;
+  nutrient_code?: string | null;
+  nutrient_name?: string | null;
+  average_daily_amount?: number | null;
+  unit?: string | null;
+  target_daily_amount?: number | null;
+  message: string;
+  recommendation?: string | null;
+}
+
+export interface NutritionReportSummaryBlock {
+  summary?: string | null;
+  risks?: string[];
+  recommendations?: string[];
+  follow_up?: string[];
+}
+
+export interface NutritionReportContent {
+  flags?: NutritionReportFlag[];
+  llm_summary?: NutritionReportSummaryBlock | null;
+  disclaimer?: string | null;
+}
+
+export interface NutritionReportData {
+  report_available?: boolean;
+  report_id?: number | null;
+  is_read?: boolean | null;
+  read_at?: string | null;
+  generated_at?: string | null;
+  report_type?: 'daily' | 'weekly' | 'monthly' | string;
+  period_key?: string | null;
+  period_start?: string | null;
+  period_end?: string | null;
+  date?: string;
+  week?: string;
+  week_start?: string;
+  week_end?: string;
+  month?: string;
+  year?: number;
+  month_number?: number;
+  month_name?: string;
+  days_in_month?: number;
+  meal_count: number;
+  total_calories: number;
+  macros?: Macros | null;
+  meal_type_breakdown?: Record<string, { count: number; calories: number }> | null;
+  nutrient_totals?: Record<string, NutrientTotal> | null;
+  health_context?: string | null;
+  health_context_applied_at?: string | null;
+  health_context_structured?: HealthContextStructured | null;
+  placeholder?: {
+    reason?: 'not_generated_yet' | 'no_logged_meals' | string;
+    message?: string | null;
+  } | null;
+  logging_coverage?: {
+    logged_days_count?: number | null;
+    missing_days_count?: number | null;
+    logged_dates?: string[];
+    missing_dates?: string[];
+    coverage_ratio?: number | null;
+    logged_week_keys?: string[];
+    missing_week_keys?: string[];
+  } | null;
+  report?: NutritionReportContent | null;
+}
+
+export interface GeneratedNutritionReportSummary {
+  id: number;
+  report_type?: 'daily' | 'weekly' | 'monthly' | string;
+  title?: string | null;
+  created_at?: string;
+  is_read?: boolean;
+  report_preview?: string | null;
+  period_label?: string | null;
+  period_start?: string | null;
+  period_end?: string | null;
+}
+
+export interface GeneratedNutritionReportDetail extends GeneratedNutritionReportSummary {
+  report_payload?: NutritionReportData | null;
+}
+
+export interface PaginatedGeneratedNutritionReports {
+  count: number;
+  next: string | null;
+  previous: string | null;
+  results: GeneratedNutritionReportSummary[];
 }
 
 /**
@@ -244,6 +367,21 @@ export interface ApiError {
 export interface VoiceUploadRequest {
   audio_file: File;
   meal_type: MealType;
+}
+
+export interface ProfileUpdateRequest {
+  first_name?: string;
+  last_name?: string;
+  health_context?: string | null;
+  health_context_applied_at?: string | null;
+}
+
+export interface HealthContextVoiceUploadResponse {
+  transcription?: {
+    text?: string;
+    [key: string]: unknown;
+  } | null;
+  profile: User;
 }
 
 // ===== APPLICATION STATE TYPES =====

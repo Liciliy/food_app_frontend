@@ -8,6 +8,7 @@ import { Clock, Utensils, Flame } from 'lucide-react';
 import type { Meal } from '../../types';
 import { formatTime, formatMealTime, formatCalories, formatMacros } from '../../utils';
 import { cn } from '../../utils';
+import { MicronutrientsSection } from './MicronutrientsSection';
 
 interface MealCardProps {
   meal: Meal;
@@ -28,6 +29,10 @@ function getMealTypeStyle(mealType: string): { bgColor: string; textColor: strin
       return { bgColor: 'bg-purple-100', textColor: 'text-purple-700', icon: '🌙', translationKey: 'mealTypes.dinner' };
     case 'snack':
       return { bgColor: 'bg-green-100', textColor: 'text-green-700', icon: '🍎', translationKey: 'mealTypes.snack' };
+    case 'water':
+      return { bgColor: 'bg-cyan-100', textColor: 'text-cyan-700', icon: '💧', translationKey: 'mealTypes.water' };
+    case 'drinks':
+      return { bgColor: 'bg-sky-100', textColor: 'text-sky-700', icon: '🥤', translationKey: 'mealTypes.drinks' };
     default:
       return { bgColor: 'bg-gray-100', textColor: 'text-gray-700', icon: '🍽️', translationKey: 'mealTypes.unknown' };
   }
@@ -79,6 +84,12 @@ export function MealCard({ meal, onClick, compact = false }: MealCardProps) {
       {meal.description && (
         <p className="text-sm text-gray-700 mb-3 line-clamp-2">
           {meal.description}
+        </p>
+      )}
+
+      {meal.consumed_weight_grams != null && (
+        <p className="text-xs text-gray-500 mb-3">
+          {t('mealCard.consumedWeight', { grams: Math.round(Number(meal.consumed_weight_grams) || 0) })}
         </p>
       )}
 
@@ -159,6 +170,8 @@ export function MealCard({ meal, onClick, compact = false }: MealCardProps) {
           </div>
         </div>
       )}
+
+      {!compact && <MicronutrientsSection meal={meal} className="mt-4" />}
 
       {/* Transcription preview (if available) */}
       {!compact && typeof meal.voice_input === 'object' && meal.voice_input?.transcription && (

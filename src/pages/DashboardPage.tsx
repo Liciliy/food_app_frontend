@@ -6,7 +6,7 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { BarChart3, LogOut, UtensilsCrossed } from 'lucide-react';
+import { BarChart3, LogOut, Settings2, UtensilsCrossed } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
 import { useMealStore } from '../stores/mealStore';
 import { Button } from '../components/common/Button';
@@ -72,6 +72,17 @@ export function DashboardPage() {
                 >
                   <BarChart3 className="w-4 h-4 sm:mr-2" />
                   <span className="sr-only sm:not-sr-only">{t('statistics')}</span>
+                </Button>
+              </Link>
+              <Link to="/profile">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="px-2 sm:px-3"
+                  aria-label={t('profile')}
+                >
+                  <Settings2 className="w-4 h-4 sm:mr-2" />
+                  <span className="sr-only sm:not-sr-only">{t('profile')}</span>
                 </Button>
               </Link>
               <span className="hidden text-sm text-gray-600 md:block">
