@@ -239,6 +239,25 @@ export function VoiceRecorder() {
     }
   };
 
+  const handlePointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    handlePressStart();
+  };
+
+  const handlePointerUp = async (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    await handlePressEnd();
+  };
+
+  const handlePointerLeave = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (e.pointerType !== 'mouse') return;
+    handleMouseLeave();
+  };
+
+  const handlePointerCancel = () => {
+    handleMouseLeave();
+  };
+
   /**
    * Handle button click for stopping in toggle mode
    */
@@ -363,11 +382,10 @@ export function VoiceRecorder() {
           
           {/* Center button */}
           <button
-            onMouseDown={handlePressStart}
-            onMouseUp={handlePressEnd}
-            onMouseLeave={handleMouseLeave}
-            onTouchStart={handlePressStart}
-            onTouchEnd={handlePressEnd}
+            onPointerDown={handlePointerDown}
+            onPointerUp={handlePointerUp}
+            onPointerLeave={handlePointerLeave}
+            onPointerCancel={handlePointerCancel}
             onClick={handleRecordButtonClick}
             disabled={isUploading || !!audioBlob}
             className={cn(
