@@ -6,7 +6,7 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { BarChart3 } from 'lucide-react';
+import { BarChart3, LogOut, UtensilsCrossed } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
 import { useMealStore } from '../stores/mealStore';
 import { Button } from '../components/common/Button';
@@ -49,33 +49,44 @@ export function DashboardPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
+      <header className="sticky top-0 z-30 border-b border-gray-200 bg-white/95 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-white/90">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <h1 className="text-xl font-semibold text-gray-900">
-                🍽️ {t('title')}
+          <div className="flex h-16 items-center justify-between gap-3">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-50 text-primary-600">
+                <UtensilsCrossed className="w-5 h-5" />
+              </div>
+              <h1 className="hidden truncate text-xl font-semibold text-gray-900 sm:block">
+                {t('title')}
               </h1>
             </div>
             
-            <div className="flex items-center space-x-3">
-              <LanguageSwitcher variant="buttons" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <LanguageSwitcher variant="buttons" className="shrink-0" />
               <Link to="/statistics">
-                <Button variant="outline" size="sm">
-                  <BarChart3 className="w-4 h-4 mr-2" />
-                  {t('statistics')}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="px-2 sm:px-3"
+                  aria-label={t('statistics')}
+                >
+                  <BarChart3 className="w-4 h-4 sm:mr-2" />
+                  <span className="sr-only sm:not-sr-only">{t('statistics')}</span>
                 </Button>
               </Link>
-              <span className="text-sm text-gray-600 hidden sm:block">
+              <span className="hidden text-sm text-gray-600 md:block">
                 {user?.first_name || user?.email}
               </span>
               <Button
                 variant="outline"
                 size="sm"
+                className="px-2 sm:px-3"
                 onClick={handleLogout}
                 isLoading={authLoading}
+                aria-label={t('auth:signOut')}
               >
-                {t('auth:signOut')}
+                <LogOut className="w-4 h-4 sm:mr-2" />
+                <span className="sr-only sm:not-sr-only">{t('auth:signOut')}</span>
               </Button>
             </div>
           </div>
@@ -83,14 +94,19 @@ export function DashboardPage() {
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="max-w-7xl mx-auto grid grid-cols-1 gap-6 px-4 py-4 sm:px-6 sm:py-6 lg:grid-cols-3 lg:px-8">
+        {/* Voice Recorder */}
+        <section className="lg:col-start-2 lg:row-start-4">
+          <VoiceRecorder />
+        </section>
+
         {/* Dashboard Stats */}
-        <section className="mb-6">
+        <section className="lg:col-span-3 lg:row-start-1">
           <DashboardStats />
         </section>
 
         {/* Charts Section */}
-        <section className="mb-6">
+        <section className="lg:col-span-3 lg:row-start-2">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Today's Nutrition Chart (Calories, Protein, Carbs, Fat) */}
             <DailyNutritionChart stats={dailyStats} isLoading={statsLoading} />
@@ -105,30 +121,22 @@ export function DashboardPage() {
         </section>
 
         {/* Weekly Trend */}
-        <section className="mb-6">
+        <section className="lg:col-span-3 lg:row-start-3">
           <WeeklyCalorieTrend stats={weeklyStats} isLoading={statsLoading} />
         </section>
 
-        {/* Main Grid Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Day Timeline */}
-          <section>
-            <DayTimeline 
-              meals={dailyStats?.meals || []} 
-              isLoading={statsLoading} 
-            />
-          </section>
+        {/* Day Timeline */}
+        <section className="lg:col-start-1 lg:row-start-4">
+          <DayTimeline 
+            meals={dailyStats?.meals || []} 
+            isLoading={statsLoading} 
+          />
+        </section>
 
-          {/* Voice Recorder */}
-          <section>
-            <VoiceRecorder />
-          </section>
-
-          {/* Recent Meals */}
-          <section>
-            <RecentMeals limit={5} />
-          </section>
-        </div>
+        {/* Recent Meals */}
+        <section className="lg:col-start-3 lg:row-start-4">
+          <RecentMeals limit={5} />
+        </section>
       </main>
     </div>
   );

@@ -55,6 +55,7 @@ interface MealActions {
   fetchDailyStats: (date?: string) => Promise<void>;
   fetchWeeklyStats: (week?: string) => Promise<void>;
   fetchMonthlyStats: (month?: string) => Promise<void>;
+  refreshDashboardData: () => Promise<void>;
   
   // UI helpers
   clearError: () => void;
@@ -129,8 +130,8 @@ export const useMealStore = create<MealStore>((set, get) => ({
         successMessage: `Meal logged! ${caloriesText}`,
       });
 
-      // Refresh dashboard data in background (don't await, don't let it fail the upload)
-      get().fetchDashboard(true).catch(() => {
+      // Refresh dashboard views in the background so charts and timelines stay current.
+      get().refreshDashboardData().catch(() => {
         // Silently ignore dashboard refresh errors
       });
       
@@ -185,8 +186,8 @@ export const useMealStore = create<MealStore>((set, get) => ({
         successMessage: `Meal undone. ${response.food_items_deleted} food items removed.`,
       });
       
-      // Refresh dashboard data in background to get updated totals
-      get().fetchDashboard(true).catch(() => {
+      // Refresh dashboard views in the background to get updated totals.
+      get().refreshDashboardData().catch(() => {
         // Silently ignore dashboard refresh errors
       });
       
@@ -237,8 +238,8 @@ export const useMealStore = create<MealStore>((set, get) => ({
         successMessage: `Meal deleted. ${response.food_items_deleted} food items removed.`,
       });
       
-      // Refresh dashboard data in background to get updated totals
-      get().fetchDashboard(true).catch(() => {
+      // Refresh dashboard views in the background to get updated totals.
+      get().refreshDashboardData().catch(() => {
         // Silently ignore dashboard refresh errors
       });
       
@@ -367,6 +368,28 @@ export const useMealStore = create<MealStore>((set, get) => ({
         error: apiError.detail || 'Failed to fetch monthly statistics.',
       });
     }
+  },
+
+  /**
+   * Refresh dashboard-related data without toggling the global loading state.
+   * This keeps the dashboard responsive after meal mutations while syncing all panels.
+   */
+  refreshDashboardData: async () => {
+    const [dashboardResult, dailyResult, weeklyResult, monthlyResult, mealsResult] = await Promise.allSettled([
+      MealService.getDashboardOverview(),
+      MealService.getDailyStats(),
+      MealService.getWeeklyStats(),
+      MealService.getMonthlyStats(),
+      MealService.getMeals(),
+    ]);
+
+    set((state) => ({
+      dashboardData: dashboardResult.status === 'fulfilled' ? dashboardResult.value : state.dashboardData,
+      dailyStats: dailyResult.status === 'fulfilled' ? dailyResult.value : state.dailyStats,
+      weeklyStats: weeklyResult.status === 'fulfilled' ? weeklyResult.value : state.weeklyStats,
+      monthlyStats: monthlyResult.status === 'fulfilled' ? monthlyResult.value : state.monthlyStats,
+      meals: mealsResult.status === 'fulfilled' ? mealsResult.value : state.meals,
+    }));
   },
 
   /**
