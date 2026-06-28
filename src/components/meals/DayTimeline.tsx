@@ -233,8 +233,8 @@ export function DayTimeline({ meals, isLoading }: DayTimelineProps) {
       const curr = positions[i];
       
       if (curr.position - prev.position < minGap) {
-        // Latest meal gets offset more to the right
-        curr.offsetLevel = (prev.offsetLevel + 1) % 4; // Allow up to 4 offset levels
+        // Latest meal gets offset more to the right, but do not wrap back to a full-width card.
+        curr.offsetLevel = Math.min(prev.offsetLevel + 1, 3);
       }
     }
 
@@ -333,19 +333,18 @@ export function DayTimeline({ meals, isLoading }: DayTimelineProps) {
           const offsetX = mealPos.offsetLevel * 12;
           const isSelected = selectedMeal?.id === mealPos.meal.id;
           const isHovered = hoveredMealId === mealPos.meal.id;
+          const overlapRightInset = isSelected ? 4 : 4 + mealPos.offsetLevel * 28;
           
           return (
             <div
               key={mealPos.meal.id}
               ref={isSelected ? selectedCardRef : undefined}
-              className="absolute flex items-center transition-all duration-200"
-              onMouseEnter={() => setHoveredMealId(mealPos.meal.id)}
-              onMouseLeave={() => setHoveredMealId(null)}
+              className="pointer-events-none absolute flex items-center transition-all duration-200"
               style={{
                 top: `${mealPos.position}%`,
                 transform: 'translateY(-50%)',
                 left: `${56 + offsetX}px`,
-                right: '4px',
+                right: `${overlapRightInset}px`,
                 zIndex: isSelected ? 50 : isHovered ? 40 : 10 + mealPos.offsetLevel,
               }}
             >
@@ -358,11 +357,13 @@ export function DayTimeline({ meals, isLoading }: DayTimelineProps) {
               {/* Meal card */}
               <div className="relative flex-1 min-w-0">
                 <div 
+                  onMouseEnter={() => setHoveredMealId(mealPos.meal.id)}
+                  onMouseLeave={() => setHoveredMealId(null)}
                   onClick={() => {
                     setSelectedMeal(isSelected ? null : mealPos.meal);
                     setShowDeleteConfirm(false);
                   }}
-                  className={`bg-white/95 backdrop-blur-sm border rounded shadow-sm hover:shadow-md transition-all cursor-pointer ${
+                  className={`pointer-events-auto bg-white/95 backdrop-blur-sm border rounded shadow-sm hover:shadow-md transition-all cursor-pointer ${
                     isSelected 
                       ? 'border-indigo-500 shadow-lg' 
                       : 'border-gray-200 hover:border-indigo-300'
