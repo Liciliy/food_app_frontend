@@ -74,6 +74,10 @@
 - [ ] Comprehensive error handling
 
 ## 📦 Deployment
+- [x] Cloudflare Pages deployment configured
+- [x] Cloudflare-managed production domain configured (`meal-hunter.uk`)
+- [x] Backend DNS subdomain reserved (`backend.meal-hunter.uk`)
+- [ ] Final production API deployment on `backend.meal-hunter.uk`
 - [ ] Environment configuration (.env files)
 - [ ] Production build optimization
 - [ ] Docker setup (optional)

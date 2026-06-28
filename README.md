@@ -98,6 +98,36 @@ src/
 - **[TODO List](TODO.md)** - Current development status and planned features
 - **[API Specification](openapi.yaml)** - OpenAPI 3.0 spec for the backend
 
+## ☁️ Deployment
+
+This frontend is deployed on Cloudflare Pages.
+
+- **Pages project:** `food-app-frontend`
+- **Production domain:** `https://meal-hunter.uk`
+- **Deploy trigger:** push to the connected Git branch on Cloudflare Pages
+- **Build command:** `npm run build`
+- **Build output directory:** `dist`
+
+### Routing
+
+The app uses React Router with `BrowserRouter`, so Cloudflare Pages must serve `index.html` for non-file routes. This is handled by [`public/_redirects`](public/_redirects).
+
+### Production DNS
+
+- **Frontend:** `meal-hunter.uk`
+- **Backend subdomain reserved:** `backend.meal-hunter.uk`
+
+### Production Environment Variables
+
+Set these in Cloudflare Pages under `Settings -> Variables and Secrets`:
+
+```env
+VITE_API_BASE_URL=https://backend.meal-hunter.uk/api
+VITE_DEBUG=false
+```
+
+If the backend is hosted somewhere else temporarily, point `VITE_API_BASE_URL` at that API instead and redeploy.
+
 ## 🔐 Authentication Flow
 
 1. **Register** → User receives verification email
@@ -122,10 +152,10 @@ Set `VITE_DEBUG=true` in `.env` to enable console logging for API calls and stat
 
 ### API Configuration
 
-The API base URL is configured in `src/services/api.ts`. For production, update `.env`:
+The API base URL is configured in `src/services/api.ts`. For production, set it in Cloudflare Pages or in `.env.production` for local production builds:
 
 ```env
-VITE_API_BASE_URL=https://api.yourfoodtracker.com/api
+VITE_API_BASE_URL=https://backend.meal-hunter.uk/api
 ```
 
 ## 📄 License
