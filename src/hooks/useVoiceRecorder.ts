@@ -60,6 +60,39 @@ export function useVoiceRecorder(): UseVoiceRecorderReturn {
   const silenceCheckIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const isRecordingRef = useRef<boolean>(false); // Track recording state for closures
 
+  const clearRecordingTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  }, []);
+
+  const clearSilenceDetection = useCallback(() => {
+    if (silenceCheckIntervalRef.current) {
+      clearInterval(silenceCheckIntervalRef.current);
+      silenceCheckIntervalRef.current = null;
+    }
+    if (silenceTimerRef.current) {
+      clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = null;
+    }
+    if (audioContextRef.current) {
+      audioContextRef.current.close();
+      audioContextRef.current = null;
+    }
+    analyserRef.current = null;
+  }, []);
+
+  const finalizeStopState = useCallback(() => {
+    clearRecordingTimer();
+    setState(prev => ({
+      ...prev,
+      isRecording: false,
+      isPaused: false,
+      stream: null,
+    }));
+  }, [clearRecordingTimer]);
+
   /**
    * Update duration timer
    */
@@ -135,29 +168,23 @@ export function useVoiceRecorder(): UseVoiceRecorderReturn {
       // Handle stop
       mediaRecorder.onstop = () => {
         const audioBlob = new Blob(chunksRef.current, { type: mimeType });
+        finalizeStopState();
         setState(prev => ({ 
           ...prev, 
-          isRecording: false, 
           audioBlob,
-          stream: null,
         }));
         
         // Stop all tracks
         streamRef.current?.getTracks().forEach(track => track.stop());
-        
-        // Clear timer
-        if (timerRef.current) {
-          clearInterval(timerRef.current);
-          timerRef.current = null;
-        }
+        streamRef.current = null;
       };
 
       // Handle error
       mediaRecorder.onerror = () => {
+        finalizeStopState();
         setState(prev => ({ 
           ...prev, 
           error: 'Recording error occurred. Please try again.',
-          isRecording: false,
         }));
       };
 
@@ -225,7 +252,7 @@ export function useVoiceRecorder(): UseVoiceRecorderReturn {
       
       setState(prev => ({ ...prev, error: errorMessage }));
     }
-  }, [updateDuration]);
+  }, [finalizeStopState, updateDuration]);
 
   /**
    * Stop recording
@@ -233,24 +260,14 @@ export function useVoiceRecorder(): UseVoiceRecorderReturn {
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && isRecordingRef.current) {
       isRecordingRef.current = false;
-      mediaRecorderRef.current.stop();
-      
-      // Clean up silence detection
-      if (silenceCheckIntervalRef.current) {
-        clearInterval(silenceCheckIntervalRef.current);
-        silenceCheckIntervalRef.current = null;
+      finalizeStopState();
+      clearSilenceDetection();
+
+      if (mediaRecorderRef.current.state !== 'inactive') {
+        mediaRecorderRef.current.stop();
       }
-      if (silenceTimerRef.current) {
-        clearTimeout(silenceTimerRef.current);
-        silenceTimerRef.current = null;
-      }
-      if (audioContextRef.current) {
-        audioContextRef.current.close();
-        audioContextRef.current = null;
-      }
-      analyserRef.current = null;
     }
-  }, []); // No dependencies needed since we use refs
+  }, [clearSilenceDetection, finalizeStopState]);
 
   /**
    * Pause recording
@@ -281,32 +298,20 @@ export function useVoiceRecorder(): UseVoiceRecorderReturn {
     // Stop any ongoing recording
     if (mediaRecorderRef.current && isRecordingRef.current) {
       isRecordingRef.current = false;
-      mediaRecorderRef.current.stop();
+      finalizeStopState();
+
+      if (mediaRecorderRef.current.state !== 'inactive') {
+        mediaRecorderRef.current.stop();
+      }
     }
     
     // Clear timers
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-    if (silenceCheckIntervalRef.current) {
-      clearInterval(silenceCheckIntervalRef.current);
-      silenceCheckIntervalRef.current = null;
-    }
-    if (silenceTimerRef.current) {
-      clearTimeout(silenceTimerRef.current);
-      silenceTimerRef.current = null;
-    }
-    
-    // Clean up audio context
-    if (audioContextRef.current) {
-      audioContextRef.current.close();
-      audioContextRef.current = null;
-    }
-    analyserRef.current = null;
+    clearRecordingTimer();
+    clearSilenceDetection();
     
     // Stop stream
     streamRef.current?.getTracks().forEach(track => track.stop());
+    streamRef.current = null;
     
     // Reset state
     setState({
@@ -321,7 +326,7 @@ export function useVoiceRecorder(): UseVoiceRecorderReturn {
     isRecordingRef.current = false;
     chunksRef.current = [];
     pausedDurationRef.current = 0;
-  }, []); // No dependencies needed since we use refs
+  }, [clearRecordingTimer, clearSilenceDetection, finalizeStopState]);
 
   /**
    * Get audio file from blob
