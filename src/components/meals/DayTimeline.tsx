@@ -356,7 +356,7 @@ export function DayTimeline({ meals, isLoading }: DayTimelineProps) {
               <div className="w-2 h-0.5 bg-gray-300 flex-shrink-0" />
               
               {/* Meal card */}
-              <div className="relative flex-1">
+              <div className="relative flex-1 min-w-0">
                 <div 
                   onClick={() => {
                     setSelectedMeal(isSelected ? null : mealPos.meal);
@@ -370,17 +370,17 @@ export function DayTimeline({ meals, isLoading }: DayTimelineProps) {
                 >
                 {/* Compact view */}
                 {!isSelected && (
-                  <div className="px-2 py-0.5">
-                    <div className="flex items-center gap-3 text-xs whitespace-nowrap">
-                      <div className="flex items-center gap-1 flex-shrink-0">
+                  <div className="overflow-hidden px-2 py-1">
+                    <div className="grid grid-cols-[minmax(0,1fr)_auto] gap-x-2 gap-y-1 text-xs sm:flex sm:flex-nowrap sm:items-center sm:gap-3">
+                      <div className="flex min-w-0 items-center gap-1 sm:flex-initial">
                         <span className={`w-1.5 h-1.5 rounded-full ${getMealTypeColor(mealPos.meal.meal_type)}`} />
-                        <span className="font-semibold text-gray-800">
+                        <span className="truncate font-semibold text-gray-800">
                           {t(getMealTypeStyle(mealPos.meal.meal_type).translationKey)}
                         </span>
                       </div>
                       
                       {mealPos.meal.total_calories && (
-                        <span className="font-bold text-gray-700 flex-shrink-0">
+                        <span className="justify-self-end font-bold text-gray-700 flex-shrink-0 sm:justify-self-auto">
                           {typeof mealPos.meal.total_calories === 'string'
                             ? parseFloat(mealPos.meal.total_calories).toFixed(0)
                             : mealPos.meal.total_calories.toFixed(0)}
@@ -389,28 +389,28 @@ export function DayTimeline({ meals, isLoading }: DayTimelineProps) {
                       )}
                       
                       {mealPos.meal.macros && (
-                        <div className="flex items-center gap-2 flex-1 min-w-0">
-                          <div className="flex items-center gap-1 flex-1">
-                            <span className="text-[10px] text-blue-600 font-medium">P{mealPos.meal.macros.protein.toFixed(0)}</span>
-                            <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden min-w-[20px]">
+                        <div className="col-span-2 grid min-w-0 grid-cols-3 gap-1.5 sm:col-span-1 sm:flex sm:items-center sm:gap-2 sm:flex-1">
+                          <div className="min-w-0 rounded bg-blue-50 px-1.5 py-1 text-center sm:flex sm:flex-1 sm:items-center sm:gap-1 sm:rounded-none sm:bg-transparent sm:px-0 sm:py-0">
+                            <span className="block truncate text-[10px] text-blue-600 font-medium">P{mealPos.meal.macros.protein.toFixed(0)}</span>
+                            <div className="mt-1 hidden flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden min-w-[20px] sm:block sm:mt-0">
                               <div 
                                 className="h-full bg-blue-500 rounded-full"
                                 style={{ width: `${Math.min((mealPos.meal.macros.protein / 40) * 100, 100)}%` }}
                               />
                             </div>
                           </div>
-                          <div className="flex items-center gap-1 flex-1">
-                            <span className="text-[10px] text-amber-600 font-medium">C{mealPos.meal.macros.carbs.toFixed(0)}</span>
-                            <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden min-w-[20px]">
+                          <div className="min-w-0 rounded bg-amber-50 px-1.5 py-1 text-center sm:flex sm:flex-1 sm:items-center sm:gap-1 sm:rounded-none sm:bg-transparent sm:px-0 sm:py-0">
+                            <span className="block truncate text-[10px] text-amber-600 font-medium">C{mealPos.meal.macros.carbs.toFixed(0)}</span>
+                            <div className="mt-1 hidden flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden min-w-[20px] sm:block sm:mt-0">
                               <div 
                                 className="h-full bg-amber-500 rounded-full"
                                 style={{ width: `${Math.min((mealPos.meal.macros.carbs / 80) * 100, 100)}%` }}
                               />
                             </div>
                           </div>
-                          <div className="flex items-center gap-1 flex-1">
-                            <span className="text-[10px] text-rose-600 font-medium">F{mealPos.meal.macros.fat.toFixed(0)}</span>
-                            <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden min-w-[20px]">
+                          <div className="min-w-0 rounded bg-rose-50 px-1.5 py-1 text-center sm:flex sm:flex-1 sm:items-center sm:gap-1 sm:rounded-none sm:bg-transparent sm:px-0 sm:py-0">
+                            <span className="block truncate text-[10px] text-rose-600 font-medium">F{mealPos.meal.macros.fat.toFixed(0)}</span>
+                            <div className="mt-1 hidden flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden min-w-[20px] sm:block sm:mt-0">
                               <div 
                                 className="h-full bg-rose-500 rounded-full"
                                 style={{ width: `${Math.min((mealPos.meal.macros.fat / 40) * 100, 100)}%` }}
